@@ -22,7 +22,7 @@ This provides the `trellis` command (alias `tl`).
 
 ```bash
 cd your-repo
-trellis init --kerminal -u your-name
+trellis init -u your-name
 ```
 
 Kerminal only reads project-level configuration in a directory containing

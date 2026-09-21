@@ -7,16 +7,12 @@
 </p>
 
 <p align="center">
-<strong>An out-of-the-box engineering framework for AI coding.</strong><br/>
-<sub>AI writes code fast, but every session it starts from scratch — no memory of your project, your conventions, or your team's requirements. Trellis persists specs, tasks, and memory into your repo, so every Kerminal session works to your engineering standards.</sub>
+<strong>Engineering memory and workflow for Kerminal.</strong><br/>
+<sub>Specs, tasks, and session memory persisted in your repo — so every Kerminal session codes to your team's standards.</sub>
 </p>
-
-> [!NOTE]
-> **TrellisKerminal** is an engineering framework for [Kerminal](https://kerminal.cn/): it persists specs, tasks, and memory into your repo so every coding session works to your team's standards. Ships as a single `trellis-kerminal` npm package; docs are plain Markdown in [`docs/`](./docs/).
 
 <p align="center">
 <a href="./README_CN.md">简体中文</a> •
-<a href="./docs/">Docs</a> •
 <a href="./docs/quickstart.md">Quick Start</a> •
 <a href="./docs/kerminal.md">Kerminal Reference</a>
 </p>
@@ -24,116 +20,151 @@
 <p align="center">
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-16a34a.svg?style=flat-square" alt="license" /></a>
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/stargazers"><img src="https://img.shields.io/github/stars/Zhiwen-Liu/TrellisKerminal?style=flat-square&color=eab308" alt="stars" /></a>
-<a href="./docs/"><img src="https://img.shields.io/badge/docs-markdown-0f766e?style=flat-square" alt="docs" /></a>
+<a href="https://www.npmjs.com/package/trellis-kerminal"><img src="https://img.shields.io/npm/v/trellis-kerminal?style=flat-square&color=cb3837" alt="npm" /></a>
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/issues"><img src="https://img.shields.io/github/issues/Zhiwen-Liu/TrellisKerminal?style=flat-square&color=e67e22" alt="open issues" /></a>
-<a href="https://github.com/Zhiwen-Liu/TrellisKerminal/pulls"><img src="https://img.shields.io/github/issues-pr/Zhiwen-Liu/TrellisKerminal?style=flat-square&color=9b59b6" alt="open PRs" /></a>
 </p>
 
-## Why Trellis?
+## The problems it solves
 
-| Capability | What it changes |
-| --- | --- |
-| **Spec-driven context** | Write conventions once in `.trellis/spec/`; task manifests (`implement.jsonl` / `check.jsonl`) pull the relevant specs into each sub-agent's context instead of repeating yourself. |
-| **Task-centered workflow** | Keep PRDs, implementation context, review context, and task status in `.trellis/tasks/` so AI work stays structured. |
-| **Project memory** | Journals in `.trellis/workspace/` preserve what happened last time, so each new session starts with real context. |
-| **Team-shared standards** | Specs live in the repo, so one person's hard-won workflow or rule can benefit the whole team. |
-| **Kerminal-native** | Built for Kerminal's pull-based skill model: entry skills, agent prompts, and generic sub-agent dispatch, no hooks required. |
+If you code with Kerminal, you have probably hit these:
 
-## Prerequisites:
+- **Every session starts from scratch** — you have explained your error-handling style, directory layout, and naming rules to the AI for the Nth time. Session ends, it forgets again.
+- **Code quality drifts between sessions** — last session's output was great; this session's style is different. Without enforced standards, output quality is a coin flip.
+- **Team conventions live in one person's head** — the senior engineer knows all the rules; nothing is written down. Newcomers and AI both depend on tribal knowledge.
+- **Long tasks blow the context window** — start a fresh session and everything you discussed, decided, and half-finished is gone.
+- **Last week's decisions are unrecoverable** — "why did we pick option B again?" means scrolling through chat history forever.
 
-- **Node.js** >= 18
-- **Python** >= 3.9
+TrellisKerminal persists **specs, tasks, and memory** into your repo, so the AI reads the record before writing a line:
 
-## Quick Start
+| Pain | How Trellis addresses it |
+|------|--------------------------|
+| Re-explaining conventions | **Spec system**: team standards live in `.trellis/spec/`; coding sub-agents load the relevant specs before they start |
+| Quality drift | **Check sub-agent**: reviews every diff against the specs and runs lint / type-check / tests, self-fixing what it can |
+| Tribal knowledge | **Bootstrap task**: the first task after init drafts your conventions into spec files — permanently captured |
+| Context loss | **Task system**: each task keeps its PRD, design, and execution plan under `.trellis/tasks/`; a new session says "continue" and picks up |
+| Lost decisions | **Workspace journals + mem search**: every session is journaled; `trellis mem search` full-text-searches local AI session history |
 
-```bash
-# 1. Install the CLI from npm
-npm install -g trellis-kerminal@latest
+## Core concepts
 
-# 2. Initialize in your repo with Kerminal
-trellis init -u your-name
+**Three persistence layers** (all inside your git repo, reviewable like code):
 
-# 3. Open the project in Kerminal and describe your task
+```
+.trellis/
+├── spec/        # Standards: your team's coding rules; sub-agents read before coding
+├── tasks/       # Tasks: per-task PRD / design / research / context manifests
+└── workspace/   # Memory: per-developer session journals, traceable across sessions
 ```
 
-To hack on the source instead:
+**One three-phase workflow** (Plan → Execute → Finish):
+
+1. **Plan** — the `trellis-brainstorm` skill clarifies requirements one question at a time and writes `prd.md`; complex tasks get `design.md`; research goes to a `trellis-research` sub-agent and is persisted
+2. **Execute** — a `trellis-implement` sub-agent reads the specs and research listed in `implement.jsonl` first, then codes; a `trellis-check` sub-agent reviews the diff against specs, runs checks, self-fixes
+3. **Finish** — after a final full-scope check, `trellis-update-spec` promotes what this task learned back into the specs — **the next session starts smarter**
+
+## Quick start
+
+```bash
+# Install
+npm install -g trellis-kerminal@latest
+
+# Initialize in your repo (needs git; offers git init if missing)
+cd your-repo
+trellis init -u your-name
+
+# Open the project in Kerminal and describe what you want
+```
+
+Prerequisites: Node.js ≥ 18, Python ≥ 3.9, [Kerminal](https://kerminal.cn/).
+
+Init writes `.kerminal/skills/` (entry skills), `.agents/skills/` (workflow skills), `.trellis/` (specs / tasks / memory), and `AGENTS.md` (guidance block), then creates your first task: **turn your team's conventions into specs**.
+
+## What a session looks like
+
+A typical task flow (all natural language inside Kerminal):
+
+```
+You: add a CSV export feature to this project
+
+AI:  (loads trellis-start, reads current state)
+     A few things to confirm — full export or filtered?
+     UTF-8 or GBK encoding? ... (one question at a time, writes prd.md)
+
+You: full export, UTF-8. good to go?
+
+AI:  (shows the PRD summary; after your go-ahead runs task.py start)
+     Implementing. Dispatching a trellis-implement sub-agent —
+     it read your spec files "Error Handling" and "API Design"
+     first, then wrote the code to match.
+     Next a trellis-check sub-agent reviewed the diff against
+     the specs; lint / typecheck / tests all pass.
+
+You: great, wrap it up
+
+AI:  ("finish the trellis task")
+     Code committed, task archived, session journaled.
+     One learning worth keeping: the CSV encoding rule is now
+     in the specs — nobody needs to ask about it again.
+```
+
+The next day, open a fresh session and say "**continue the task**" (`trellis-continue`); the AI picks up from the journal and task docs. Need an old decision? `trellis mem search "CSV encoding"` finds the original discussion.
+
+## Command reference
+
+| Command | What it does |
+|---------|--------------|
+| `trellis init` | Initialize a project (Kerminal by default, no platform flag needed) |
+| `trellis update` | Refresh templates to the latest version (hash-tracked; your edits are never silently overwritten) |
+| `trellis upgrade` | Upgrade the global CLI itself |
+| `trellis mem` | Search local AI session history (Kerminal / Claude Code / Codex and 5 more stores; offline, read-only) |
+| `trellis workflow` | Inspect / reset `.trellis/workflow.md` to the bundled template |
+| `trellis uninstall` | Cleanly remove all Trellis-managed files |
+
+Inside a session you never memorize commands — entry skills load by name: `trellis-start`, `trellis-continue`, `trellis-finish-work`. Kerminal has no slash palette; just say "finish the trellis task".
+
+## FAQ
+
+<details>
+<summary><strong>How is this different from just writing an AGENTS.md / CLAUDE.md?</strong></summary>
+
+Single files grow monolithic and unmaintained. Trellis splits it into layered specs (per package / per layer), lifecycle-tracked tasks (PRD → implement → archive), and structured session journals — with sub-agents loading only the relevant slice, instead of stuffing one huge file into context every time.
+
+</details>
+
+<details>
+<summary><strong>Do I have to write the specs by hand?</strong></summary>
+
+No. The first task after init has the AI draft specs from your existing code; you tighten the important parts by hand. During normal use, `trellis-update-spec` keeps capturing new learnings.
+
+</details>
+
+<details>
+<summary><strong>Will updates overwrite my customized template files?</strong></summary>
+
+No. `trellis update` hash-tracks every file's original: modified files trigger a conflict prompt, only pristine ones auto-refresh. Paths can also be permanently excluded via `update.skip` in `config.yaml`.
+
+</details>
+
+<details>
+<summary><strong>Does this work for teams?</strong></summary>
+
+Yes. Session journals are isolated per developer (`.trellis/workspace/<name>/`); specs and tasks live in the repo and go through review like any code. Monorepos are supported with per-package specs (auto-detected by `trellis init`).
+
+</details>
+
+## Building from source
 
 ```bash
 git clone https://github.com/Zhiwen-Liu/TrellisKerminal.git
 cd TrellisKerminal
 pnpm install && pnpm build
-cd packages/cli && pnpm link --global   # provides `trellis` (alias `tl`)
-#    the global link resolves into this clone — keep it around
+cd packages/cli && pnpm link --global   # provides trellis / tl
 ```
 
-See [Quick Start](./docs/quickstart.md) and the [Kerminal reference](./docs/kerminal.md) for setup details.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide.
 
-## How to Use
+## Community
 
-The workflow is simple:
-
-1. **Describe what you want** in natural language.
-2. **Brainstorm** with the AI one question at a time until the PRD is clear, then implementation begins.
-3. **Let it run** — the AI calls Trellis Implement and auto-checks the result against specs, lint, type-check, and tests.
-4. **Ask the agent to finish the trellis task** when the work is done or the session context fills up (Kerminal has no slash palette, so `/trellis:finish-work` becomes a plain request). Trellis archives the task and updates journals.
-
-## How It Works
-
-Trellis runs a 3-phase loop (Plan → Execute → Finish) with skills and sub-agents dispatched on demand:
-
-1. **Plan** — `trellis-brainstorm` walks through requirements one question at a time and writes `prd.md`. Research-heavy items go to a `trellis-research` sub-agent. The result is curated specs + research files referenced from `implement.jsonl` / `check.jsonl`.
-2. **Execute** — a `trellis-implement` sub-agent writes code from the PRD, loading the curated context from `implement.jsonl` first (no git commit); a `trellis-check` sub-agent then reviews the diff against specs and runs lint, type-check, and tests, self-fixing where it can.
-3. **Finish** — a final full-scope check runs, then `trellis-update-spec` promotes new learnings back into `.trellis/spec/` so the next session starts smarter.
-
-## Resources
-
-| Need                    | Link                                     |
-| ----------------------- | ---------------------------------------- |
-| Install in a repo       | [Quick Start](./docs/quickstart.md)      |
-| Kerminal platform model | [Kerminal Reference](./docs/kerminal.md) |
-
-## FAQ
-
-<details>
-<summary><strong>How is Trellis different from <code>CLAUDE.md</code>, <code>AGENTS.md</code>, or <code>.cursorrules</code>?</strong></summary>
-
-Those files are useful entry points, but they tend to become monolithic. Trellis adds scoped specs, task PRDs, workflow gates, workspace memory, and Kerminal-tuned generated files around them.
-
-</details>
-
-<details>
-<summary><strong>Which AI tools does TrellisKerminal support?</strong></summary>
-
-[Kerminal](https://kerminal.cn/) only, by design — the entire workflow, skill set, and update pipeline are tuned for it.
-
-</details>
-
-<details>
-<summary><strong>Is Trellis for solo developers or teams?</strong></summary>
-
-Both. Solo developers use it for memory and repeatable workflow. Teams get the larger benefit: shared standards, task boundaries, and reviewable context.
-
-</details>
-
-<details>
-<summary><strong>Do I have to write every spec file manually?</strong></summary>
-
-No. Many teams start by letting AI draft specs from existing code and then tighten the important parts by hand. Trellis works best when you keep the high-signal rules explicit and versioned.
-
-</details>
-
-<details>
-<summary><strong>Can teams use this without constant conflicts?</strong></summary>
-
-Yes. Personal workspace journals stay separate per developer, while shared specs and tasks stay in the repo where they can be reviewed and improved like any other project artifact.
-
-</details>
-
-## Community & Resources
-
-- [Docs (Markdown)](./docs/)
-- [GitHub Issues](https://github.com/Zhiwen-Liu/TrellisKerminal/issues)
-- [Discussions](https://github.com/Zhiwen-Liu/TrellisKerminal/discussions)
+- [GitHub Issues](https://github.com/Zhiwen-Liu/TrellisKerminal/issues) · [Discussions](https://github.com/Zhiwen-Liu/TrellisKerminal/discussions)
 
 <p align="center">
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal">TrellisKerminal</a> •
