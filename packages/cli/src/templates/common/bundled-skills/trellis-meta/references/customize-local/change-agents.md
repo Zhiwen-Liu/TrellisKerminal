@@ -1,31 +1,22 @@
 # Change Local Agents
 
-When the user wants to change `trellis-research`, `trellis-implement`, or `trellis-check` behavior, edit platform agent files in the user project.
+When the user wants to change `trellis-research`, `trellis-implement`, or `trellis-check` behavior, edit the corresponding agent skills under `.kerminal/skills/` in the user project.
 
 ## Read These Files First
 
-1. Target platform agent directory
+1. The target agent skill under `.kerminal/skills/`
 2. `.trellis/workflow.md` Phase 2 / research routing
 3. Current task `prd.md`
 4. Current task `implement.jsonl` / `check.jsonl`
-5. Relevant hook or agent prelude
+5. The agent prelude (the pull-based context-reading steps at the top of the skill)
 
 ## Common Paths
 
 | Platform | Path |
 | --- | --- |
-| Claude Code | `.claude/agents/trellis-*.md` |
-| Cursor | `.cursor/agents/trellis-*.md` |
-| OpenCode | `.opencode/agents/trellis-*.md` |
-| Codex | `.codex/agents/trellis-*.toml` |
-| Kiro | `.kiro/agents/trellis-*.json` |
-| Gemini CLI | `.gemini/agents/trellis-*.md` |
-| Qoder | `.qoder/agents/trellis-*.md` |
-| CodeBuddy | `.codebuddy/agents/trellis-*.md` |
-| Factory Droid | `.factory/droids/trellis-*.md` |
-| Pi Agent | `.pi/agents/trellis-*.md` |
-| Reasonix | `.reasonix/skills/trellis-*/SKILL.md` (subagent frontmatter) |
-| ZCode | `.zcode/agents/trellis-*.md` |
+| Kerminal | `.kerminal/skills/trellis-{research,implement,check}/SKILL.md` |
+
+Earlier releases shipped these prompts as per-platform agent definition files; the Kerminal-only distribution ships them only as skills. Kerminal has no sub-agent registry — the main session loads a skill and spawns a generic sub-agent whose prompt is the skill content.
 
 Use the actual paths in the user project as authoritative.
 
@@ -45,12 +36,8 @@ Use the actual paths in the user project as authoritative.
 2. **Do not hard-code project specs into agents**: long-term specs belong in `.trellis/spec/`; agents are responsible for reading them.
 3. **Make read order explicit**: active task -> PRD -> info -> JSONL -> spec/research.
 4. **Make write boundaries explicit**: which directories may be written and which may not.
-5. **Synchronize across platforms**: when the user configured multiple platforms, decide whether to change only the current platform or all platform agents.
+5. **Synchronize across the agent skills**: when a rule affects research, implement, and check together, decide whether to change one skill or all of the agent skills.
 
-## Agent Pull Platforms
+## The Pull-Based Prelude
 
-If an agent file contains a prelude for "read task/context after startup," do not remove those steps when editing. Otherwise the agent will work only from chat context and bypass Trellis's core mechanism.
-
-## Hook Push Platforms
-
-If context is injected by a hook, the agent file should still retain responsibility boundaries. Do not remove PRD/spec requirements from the agent just because a hook injects context.
+Kerminal agent skills open with a prelude that reads the active task, the task JSONL, and task artifacts after startup. Do not remove those steps when editing — otherwise the agent works only from chat context and bypasses Trellis's core mechanism. (Earlier releases also supported hook-push platforms where a platform hook injected context before the agent started; responsibility boundaries still had to live in the agent file there.)

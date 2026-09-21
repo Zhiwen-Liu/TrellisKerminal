@@ -77,6 +77,18 @@ max_journal_lines: 2000
 # default_package: frontend
 
 #-------------------------------------------------------------------------------
+# Update skip
+#-------------------------------------------------------------------------------
+# Paths listed under update.skip are never overwritten by `trellis update`.
+# Useful for template files you have customized. Paths may be files or
+# directories (a directory covers everything under it).
+#
+# update:
+#   skip:
+#     - .kerminal/skills/trellis-start/SKILL.md
+#     - .agents/skills/
+
+#-------------------------------------------------------------------------------
 # Sub-agent context injection limits
 #-------------------------------------------------------------------------------
 # Caps how much task context (implement.jsonl / check.jsonl referenced files,

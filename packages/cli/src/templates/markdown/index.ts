@@ -33,10 +33,6 @@ export const workspaceIndexContent: string =
 // Backwards compatibility alias
 export const agentProgressIndexContent = workspaceIndexContent;
 
-// Gitignore (template file - .gitignore is ignored by npm)
-export const workflowGitignoreContent: string =
-  readLocalTemplate("gitignore.txt");
-
 // =============================================================================
 // Structure templates (generic templates from .txt files)
 // These are NOT dogfooded - they are generic templates for new projects

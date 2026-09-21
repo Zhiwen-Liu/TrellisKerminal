@@ -79,7 +79,7 @@ cd packages/cli && pnpm link --global   # 提供 `trellis`（别名 `tl`）
 
 ## 工作原理
 
-Trellis 内部运行一个 4 阶段循环，skill 与子代理均由系统自动调用：
+Trellis 内部运行一个 3 阶段循环（Plan → Execute → Finish），skill 与子代理按需派发：
 
 1. **Plan（规划）** —— `trellis-brainstorm` 逐题梳理需求并写入 `prd.md`；涉及资料调研的部分派发给 `trellis-research` 子代理处理。阶段产出为一组精选的 Spec 与研究文件，由 `implement.jsonl` / `check.jsonl` 编排。
 2. **Implement（实现）** —— `trellis-implement` 子代理依据 PRD 编写代码，所需上下文已按 `implement.jsonl` 自动注入，不会执行 git commit。
@@ -103,9 +103,9 @@ Trellis 内部运行一个 4 阶段循环，skill 与子代理均由系统自动
 </details>
 
 <details>
-<summary><strong>Trellis 是否仅支持 Claude Code？</strong></summary>
+<summary><strong>TrellisKerminal 支持哪些 AI 工具？</strong></summary>
 
-是的，而且是有意为之。TrellisKerminal 仅支持 [Kerminal](https://kerminal.cn/) —— 整个工作流、技能集与更新管线都为它量身调优。
+仅支持 [Kerminal](https://kerminal.cn/)，有意为之 —— 整个工作流、技能集与更新管线都为它量身调优。
 
 </details>
 

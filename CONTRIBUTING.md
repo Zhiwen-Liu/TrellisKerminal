@@ -48,7 +48,7 @@ Code contributions are welcome for:
 
 ### Prerequisites
 
-- Node.js 20+ (the version CI runs on)
+- Node.js 18+ (CI runs the 18 and 20 matrices)
 - pnpm 10
 - Python 3.9+ (for the `.trellis/` scripts and the Python templates under `packages/cli/src/templates/`)
 
@@ -92,7 +92,7 @@ TrellisKerminal/
 │   │   ├── cli/             # CLI entry point
 │   │   ├── commands/        # CLI commands (init, update, ...)
 │   │   ├── configurators/   # Platform template application (kerminal.ts)
-│   │   ├── core/            # Core domain modules (channel, task, ...)
+│   │   ├── core/            # Core domain modules (task, mem)
 │   │   ├── templates/       # Templates installed into user projects ←
 │   │   │   ├── common/      # Workflow skills, bundled skills, entry commands
 │   │   │   ├── kerminal/    # Kerminal platform files (→ .kerminal/)

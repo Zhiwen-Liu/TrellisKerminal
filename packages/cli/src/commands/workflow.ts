@@ -58,10 +58,7 @@ function isInteractive(): boolean {
 function printListing(templates: WorkflowTemplateListing[]): void {
   console.log(chalk.cyan("\nAvailable workflow templates:\n"));
   for (const t of templates) {
-    const tag =
-      t.source === "bundled"
-        ? chalk.gray(" (bundled)")
-        : chalk.gray(" (marketplace)");
+    const tag = chalk.gray(" (bundled)");
     console.log(`  ${chalk.green(t.id)}${tag} — ${t.name}`);
     if (t.description) {
       console.log(chalk.gray(`    ${t.description}`));

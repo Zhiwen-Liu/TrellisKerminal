@@ -1,7 +1,7 @@
 {
   "name": "trellis-kerminal",
   "version": "0.8.1",
-  "description": "TrellisKerminal — an engineering framework for Kerminal: specs, tasks, and memory persisted in your repo",
+  "description": "TrellisKerminal \u2014 an engineering framework for Kerminal: specs, tasks, and memory persisted in your repo",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -28,7 +28,7 @@
     "typecheck": "tsc --noEmit",
     "lint:py": "basedpyright",
     "lint:all": "pnpm lint && pnpm lint:py",
-    "prepublishOnly": "pnpm test && pnpm run build && cp ../../README.md ../../LICENSE . && cp -r ../../assets .",
+    "prepublishOnly": "pnpm test && pnpm run build && cp ../../README.md ../../LICENSE . && rm -rf assets && cp -r ../../assets .",
     "release": "node scripts/release.js patch",
     "release:minor": "node scripts/release.js minor",
     "release:major": "node scripts/release.js major",
@@ -54,12 +54,10 @@
     "commander": "^12.1.0",
     "figlet": "^1.9.4",
     "inquirer": "^9.3.7",
-    "undici": "^6.21.0",
-    "zod": "^4.4.2"
+    "undici": "^6.21.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
-    "@types/figlet": "^1.7.0",
     "@types/inquirer": "^9.0.7",
     "@types/node": "^20.17.10",
     "@vitest/coverage-v8": "^4.0.18",
@@ -76,8 +74,6 @@
   "files": [
     "dist",
     "bin",
-    "templates",
-    "scripts",
     "assets",
     "README.md",
     "LICENSE"

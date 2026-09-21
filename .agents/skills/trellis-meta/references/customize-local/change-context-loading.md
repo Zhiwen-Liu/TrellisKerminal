@@ -1,5 +1,7 @@
 # Change Local Context Loading
 
+> **Kerminal is pull-based**: context is read on demand by skills (`get_context.py` + the agent-skill prelude), not injected by hooks. The hook-based flow described in this page is the model of earlier multi-platform releases, kept as background.
+
 Context loading determines when AI reads workflow, task, spec, research, workspace, and git status. Read this page when the user says "AI does not know the current task," "the agent did not read specs," or "there is too much/too little context."
 
 ## Read These Files First

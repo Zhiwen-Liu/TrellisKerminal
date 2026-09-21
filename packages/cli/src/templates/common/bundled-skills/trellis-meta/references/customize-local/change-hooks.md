@@ -1,10 +1,12 @@
 # Change Local Hooks
 
+> **Kerminal is pull-based**: context is read on demand by skills (`get_context.py` + the agent-skill prelude), not injected by hooks. The hook-based flow described in this page is the model of earlier multi-platform releases, kept as background. On Kerminal, the only hooks that exist are the task lifecycle hooks (`hooks.after_*`) in `.trellis/config.yaml`.
+
 Hooks are the automation layer that connects a platform to Trellis. When the user wants to change "when context is injected," "how shell commands inherit a session," or "which files are read before an agent starts," hooks are usually the edit point.
 
 ## Read These Files First
 
-1. Target platform settings/config, such as `.claude/settings.json`, `.codex/hooks.json`, `.cursor/hooks.json`, `.trae/hooks.json`
+1. Target platform settings/config file (historical platforms kept a per-platform settings file registering the hooks)
 2. Target platform hooks directory
 3. `.trellis/scripts/common/active_task.py`
 4. `.trellis/scripts/common/session_context.py`
@@ -32,8 +34,8 @@ Hooks are the automation layer that connects a platform to Trellis. When the use
 First find the session-start hook:
 
 ```text
-.claude/settings.json
-.claude/hooks/session-start.py
+<platform settings file>
+<platform hooks directory>/session-start.py
 ```
 
 If the hook ultimately calls `.trellis/scripts/get_context.py` or `session_context.py`, editing the local script is usually more robust than hard-coding content in the hook.

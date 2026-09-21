@@ -5,7 +5,7 @@ When the user wants to change Trellis phases, next-action hints, whether to crea
 ## Read These Files First
 
 1. `.trellis/workflow.md`
-2. Entry files for the current platform, such as skills/commands/prompts/workflows
+2. Entry skills for the current platform (`.kerminal/skills/`, `.agents/skills/`)
 3. The current task's `task.json` and `prd.md`
 
 ## Common Needs And Edit Points
@@ -23,8 +23,8 @@ When the user wants to change Trellis phases, next-action hints, whether to crea
 
 1. Find the relevant section in `.trellis/workflow.md`.
 2. When changing rules, keep explicit trigger conditions and next actions.
-3. If adding or renaming a skill/agent, synchronize the corresponding files in platform directories.
-4. Workflow-state changes only need an edit to the `[workflow-state:STATUS]` block in `.trellis/workflow.md`. The hook is parser-only — it reads whatever you put in the block. Keep the opening and closing tags' STATUS strings identical (`[workflow-state:foo]…[/workflow-state:foo]`); mismatched STATUS pairs are silently dropped.
+3. If adding or renaming a skill/agent, synchronize the corresponding skill files under `.kerminal/skills/` and `.agents/skills/`.
+4. Workflow-state changes only need an edit to the `[workflow-state:STATUS]` block in `.trellis/workflow.md`. The breadcrumb reader is parser-only — it reads whatever you put in the block on every context pull. Keep the opening and closing tags' STATUS strings identical (`[workflow-state:foo]…[/workflow-state:foo]`); mismatched STATUS pairs are silently dropped.
 5. Make the AI reread `.trellis/workflow.md`; do not keep using rules from the old conversation.
 
 ## Example: Relax Task Creation Requirements
@@ -43,9 +43,9 @@ If the formal Phase 1 flow also needs to change, synchronize the Phase 1 section
 
 If the user wants the main session to handle implementation and checking itself, change the Phase 2 routing in `.trellis/workflow.md` instead of deleting the `trellis-implement` / `trellis-check` skills under `.kerminal/skills/` — keeping the skills intact lets the routing be restored later.
 
-## `/trellis:continue` Route Table
+## Resume Routing: `trellis-continue`
 
-`/trellis:continue` resumes a task by deciding which phase step to load next. The decision combines `task.json.status` with the presence of artifacts inside the task directory. The mapping is fixed in the command itself; customizations that add custom statuses must extend both the workflow.md tag block and this table.
+Resuming a task means loading the `trellis-continue` entry skill (`.kerminal/skills/trellis-continue/`). It runs `get_context.py`, loads the Phase Index from `.trellis/workflow.md`, and decides which phase step to load next by combining `task.json.status` with the artifacts present in the task directory. The routing list is fixed in the skill itself; the steps it lands on are defined in `.trellis/workflow.md`.
 
 | `status` | Artifact state | Resume at |
 | --- | --- | --- |
@@ -56,9 +56,9 @@ If the user wants the main session to handle implementation and checking itself,
 | `in_progress` | no implementation in conversation history | Phase 2.1 (`trellis-implement`) |
 | `in_progress` | implementation done, no `trellis-check` run | Phase 2.2 (`trellis-check`) |
 | `in_progress` | check passed | Phase 3.3 (spec update) → 3.4 (commit) |
-| `completed` | task is still in active tree | Phase 3.5 (run `/trellis:finish-work` to archive) |
+| `completed` | task is still in active tree | Phase 3.5 (load `trellis-finish-work` to archive) |
 
-When you add a custom status (e.g. `in-review`), add a `[workflow-state:in-review]` block in `.trellis/workflow.md` for the per-turn breadcrumb AND extend this route table — usually by editing the `/trellis:continue` command file (`.{platform}/commands/trellis/continue.md` or equivalent) to add a row that decides where to resume from. Without the route entry, `/trellis:continue` will fall through to a default branch and the user will not land on the step you intended.
+When you add a custom status (e.g. `in-review`), add a `[workflow-state:in-review]` block in `.trellis/workflow.md` for the per-turn breadcrumb AND extend the corresponding phase guidance in `.trellis/workflow.md` so the new status has a step to land on. If the status also needs its own resume row, extend the routing list inside the `trellis-continue` skill — it is a Trellis-managed template file, so check `.trellis/.template-hashes.json` (or list it under `update.skip` in `.trellis/config.yaml`) before editing. Without the route entry, resume falls through to a default branch and the user will not land on the step you intended.
 
 ## Notes
 

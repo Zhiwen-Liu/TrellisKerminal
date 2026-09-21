@@ -8,7 +8,7 @@ Often the user does not need to change Trellis mechanics; they need local AI to 
 | --- | --- |
 | Rules code must follow | `.trellis/spec/<layer>/` |
 | Cross-layer thinking methods | `.trellis/spec/guides/` |
-| AI capability for a project-specific flow | Platform-local skill |
+| AI capability for a project-specific flow | Project-local skill (`.agents/skills/` or `.kerminal/skills/`) |
 | One-off task material | `.trellis/tasks/<task>/` |
 | Session summary | `.trellis/workspace/<developer>/journal-N.md` |
 
@@ -17,7 +17,7 @@ Often the user does not need to change Trellis mechanics; they need local AI to 
 If the user wants AI to know "how this project customizes Trellis," create a local skill:
 
 ```text
-.claude/skills/trellis-local/
+.agents/skills/trellis-local/
 └── SKILL.md
 ```
 
@@ -26,7 +26,7 @@ Example:
 ```md
 ---
 name: trellis-local
-description: "Project-local Trellis customizations for this repository. Use when changing this project's Trellis workflow, hooks, local agents, or team-specific conventions."
+description: "Project-local Trellis customizations for this repository. Use when changing this project's Trellis workflow, local skills, or team-specific conventions."
 ---
 
 # Trellis Local
@@ -39,16 +39,12 @@ This skill documents this repository's Trellis customizations only.
 
 - ...
 
-## Local Hook Changes
-
-- ...
-
 ## Local Agent Changes
 
 - ...
 ```
 
-For multi-platform projects, place equivalent versions in other platform skill directories, or use `.agents/skills/` for platforms that support the shared layer.
+Kerminal discovers `.agents/skills/` natively, so every session in the project picks the skill up.
 
 ## Write To `.trellis/spec/`
 

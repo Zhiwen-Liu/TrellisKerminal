@@ -51,16 +51,6 @@ These guides help you **ask the right questions before coding**.
 
 → Read [Code Reuse Thinking Guide](./code-reuse-thinking-guide.md)
 
-### When to Think About Cross-Platform Issues
-
-- [ ] You are editing Python scripts, shell commands, hooks, or generated config
-- [ ] You are adding or documenting a command users copy into terminals
-- [ ] Code or docs assume `python3`, shebang execution, `/` path separators, or
-      POSIX-only shell behavior
-- [ ] You are changing persisted JSON or migrations that must work across
-      macOS, Linux, and Windows
-
-
 ### When Verifying AI Cross-Review Results
 
 - [ ] Reviewer claims "user input can be malicious" → Check the actual data source (internal manifest? user config? external API?)

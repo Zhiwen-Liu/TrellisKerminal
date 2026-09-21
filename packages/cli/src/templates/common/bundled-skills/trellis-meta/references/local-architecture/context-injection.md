@@ -1,5 +1,7 @@
 # Local Context Injection System
 
+> **Kerminal is pull-based**: context is read on demand by skills (`get_context.py` + the agent-skill prelude), not injected by hooks. The hook-based flow described in this page is the model of earlier multi-platform releases, kept as background.
+
 Trellis context injection aims to make AI read the right files at the right time instead of relying on model memory. In a user project, injection is implemented by `.trellis/` scripts together with platform hooks, agents, and skills.
 
 ## Injected Context Types

@@ -460,13 +460,13 @@ is a separate conversation, not a bootstrap concern.
 
 ## Quick explainer of the runtime (share when they ask "why do we need spec at all")
 
-- Every AI coding task spawns two sub-agents: \`trellis-implement\` (writes
+- Every AI coding task dispatches two sub-agents: \`trellis-implement\` (writes
   code) and \`trellis-check\` (verifies quality).
 - Each task has \`implement.jsonl\` / \`check.jsonl\` manifests listing which
   spec files to load.
-- The platform hook auto-injects those spec files + the task's \`prd.md\`
-  into every sub-agent prompt, so the sub-agent codes/reviews per team
-  conventions without anyone pasting them manually.
+- Each sub-agent's prompt starts with the pull-based prelude: it reads the
+  jsonl-listed spec files + the task's \`prd.md\` before writing a line, so
+  it codes/reviews per team conventions without anyone pasting them manually.
 - Source of truth: \`.trellis/spec/\`. That's why filling it well now pays
   off forever.
 
@@ -621,34 +621,34 @@ they engage.
 
 ### 1. What Trellis is + the workflow
 
-Trellis is a workflow layer over Claude Code / Cursor / etc. that keeps AI
-agents consistent with project-specific conventions instead of writing generic
-code every session.
+Trellis is a workflow layer for Kerminal that keeps AI agents consistent
+with project-specific conventions instead of writing generic code every
+session.
 
 - **Three phases**: Plan (brainstorm → \`prd.md\`) → Execute (code + check) →
   Finish (capture + wrap). Full reference: \`.trellis/workflow.md\`.
 - **Task lifecycle**: planning → in_progress → done → archive, under
   \`.trellis/tasks/\`.
-- **Core slash commands**:
-  - \`/trellis:continue\` — resume the current session's active task
-  - \`/trellis:finish-work\` — wrap up a finished task
-  - \`/trellis:start\` — session boot from scratch (not needed here; the
-    SessionStart hook does its job automatically)
+- **Entry skills** (Kerminal has no slash palette — ask for them by name):
+  - \`trellis-continue\` — resume the current session's active task
+  - \`trellis-finish-work\` — wrap up a finished task (or just say "finish
+    the trellis task")
+  - \`trellis-start\` — session boot from scratch
 
 ### 2. Runtime mechanics (explain when they ask "how does it know what to do")
 
-- **SessionStart hook** runs \`get_context.py\` and injects identity, git
-  status, session active task, active tasks, and workflow phase into the AI
-  conversation at every session start.
-- **\`<workflow-state>\` tag** is auto-injected with every user message,
-  carrying the current task + phase hint.
-- **\`/trellis:continue\`** loads the Phase Index, reads \`prd.md\` + recent
+- This is a pull-based platform (no hooks): \`get_context.py\` provides
+  identity, git status, session active task, active tasks, and workflow phase
+  whenever an entry skill asks for it.
+- The context pull also carries the current workflow-state rules (task +
+  phase guidance) so every session knows where it stands.
+- **\`trellis-continue\`** loads the Phase Index, reads \`prd.md\` + recent
   activity, and routes to the right skill (\`trellis-brainstorm\` for planning,
   \`trellis-implement\` for coding, \`trellis-check\` for verification).
-- **\`trellis-implement\` sub-agent** is spawned when code needs to be written.
-  The platform hook reads \`{TASK_DIR}/implement.jsonl\` and auto-injects those
-  spec files + \`prd.md\` into the sub-agent's prompt so it codes per project
-  conventions.
+- **\`trellis-implement\` sub-agent** is dispatched when code needs to be
+  written. Its prompt starts with a pull-based prelude that reads
+  \`{TASK_DIR}/implement.jsonl\` and loads those spec files + \`prd.md\`,
+  so it codes per project conventions.
 - **\`trellis-check\` sub-agent** follows the same pattern with \`check.jsonl\`
   — reviews changes against specs, auto-fixes issues, runs lint/typecheck.
 
@@ -675,16 +675,17 @@ File layout (mention when they ask "where does what live"):
   their journal from another machine and worth mentioning.
 - Run \`${pythonCmd} ./.trellis/scripts/task.py list --assignee ${developer}\` to
   show tasks assigned to them. (Quote the name if it contains spaces.)
-- Remind them that the "My Tasks" section appears in the SessionStart context
-  on every new session.
+- Remind them that the "My Tasks" section appears in the context pull on
+  every session start.
 
 ---
 
 ## Optional: walk through a small task end-to-end
 
 If they want to practice before touching real work, offer to pick a tiny
-P3 task or a typo fix and run the full cycle together: \`/trellis:continue\`
-→ you implement via sub-agents → \`/trellis:finish-work\`.
+P3 task or a typo fix and run the full cycle together: load
+\`trellis-continue\` → implement via sub-agents → load
+\`trellis-finish-work\`.
 
 ---
 

@@ -79,7 +79,7 @@ The workflow is simple:
 
 ## How It Works
 
-Trellis runs a 4-phase loop with auto-invoked skills and sub-agents:
+Trellis runs a 3-phase loop (Plan → Execute → Finish) with skills and sub-agents dispatched on demand:
 
 1. **Plan** — `trellis-brainstorm` walks through requirements one question at a time and writes `prd.md`. Research-heavy items go to a `trellis-research` sub-agent. The result is curated specs + research files referenced from `implement.jsonl` / `check.jsonl`.
 2. **Implement** — a `trellis-implement` sub-agent writes code from the PRD with the curated context auto-injected, no git commit.
@@ -103,9 +103,9 @@ Those files are useful entry points, but they tend to become monolithic. Trellis
 </details>
 
 <details>
-<summary><strong>Is Trellis only for Claude Code?</strong></summary>
+<summary><strong>Which AI tools does TrellisKerminal support?</strong></summary>
 
-Yes, by design. TrellisKerminal targets [Kerminal](https://kerminal.cn/) as its only platform — the entire workflow, skill set, and update pipeline are tuned for it.
+[Kerminal](https://kerminal.cn/) only, by design — the entire workflow, skill set, and update pipeline are tuned for it.
 
 </details>
 

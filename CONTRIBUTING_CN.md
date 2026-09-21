@@ -48,7 +48,7 @@ TrellisKerminal 是面向 [Kerminal](https://kerminal.cn/) 的工程化框架，
 
 ### 前置要求
 
-- Node.js 20+（CI 使用的版本）
+- Node.js 18+（CI 同时跑 18 与 20 矩阵）
 - pnpm 10
 - Python 3.9+（用于 `.trellis/` 脚本和 `packages/cli/src/templates/` 下的 Python 模板）
 
@@ -92,7 +92,7 @@ TrellisKerminal/
 │   │   ├── cli/             # CLI 入口
 │   │   ├── commands/        # CLI 命令 (init, update, ...)
 │   │   ├── configurators/   # 平台模板应用逻辑 (kerminal.ts)
-│   │   ├── core/            # 核心领域模块 (channel, task, ...)
+│   │   ├── core/            # 核心领域模块 (task, mem)
 │   │   ├── templates/       # 安装到用户项目的模板 ←
 │   │   │   ├── common/      # 工作流技能、捆绑技能、入口命令
 │   │   │   ├── kerminal/    # Kerminal 平台文件 (→ .kerminal/)

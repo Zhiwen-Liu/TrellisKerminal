@@ -147,7 +147,7 @@ export async function createWorkflowStructure(
   // (additive-only — never overwrites a user's existing file wholesale).
   ensureGitattributes(cwd);
 
-  // Dispatch channel runtime agent definitions. These are platform-agnostic
+  // Write the workspace index (session journals rotate under workspace/<developer>/).
   // Create workspace/ with index.md
   ensureDir(path.join(cwd, PATHS.WORKSPACE));
   await writeFile(

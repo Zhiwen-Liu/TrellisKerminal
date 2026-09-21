@@ -21,7 +21,7 @@
  *   project `AGENTS.md` into spawned sub-agents, and task context is pulled
  *   through the pull-based prelude.
  * - `.kerminal/KERMINAL.md` — operator guide; also gives the platform a
- *   configDir-owned tracked file so `trellis platforms` / `uninstall`
+ *   configDir-owned tracked file so `trellis uninstall`
  *   can detect and scope Kerminal.
  */
 

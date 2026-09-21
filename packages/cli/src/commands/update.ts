@@ -2559,7 +2559,7 @@ export async function update(options: UpdateOptions): Promise<void> {
         console.log("");
         console.log(
           chalk.gray(
-            "Use AI to help: Ask Claude/Cursor to read the task and fix your custom files.",
+            "Use AI to help: ask your Kerminal agent to read the task and fix your custom files.",
           ),
         );
       }

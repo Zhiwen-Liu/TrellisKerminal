@@ -110,7 +110,7 @@ python3 ./.trellis/scripts/get_context.py --mode phase --step <X.Y>  # detailed 
   degrades to a generic "Refer to workflow.md for current step." line —
   intentionally visible so users notice and fix a broken workflow.md.
 
-  INVARIANT (test/regression.test.ts):
+  INVARIANT:
     Every workflow-walkthrough step marked `[required · once]` must have a
     matching enforcement line in its phase's [workflow-state:*] block. The
     breadcrumb is the only per-turn channel; if a mandatory step isn't
@@ -136,8 +136,8 @@ python3 ./.trellis/scripts/get_context.py --mode phase --step <X.Y>  # detailed 
       matching phase's `[required · once]` walkthrough steps for sync
     - Run `trellis update` after editing to push the new bodies to
       downstream user projects (block-level managed replacement)
-    - Full runtime contract:
-      .trellis/spec/cli/backend/workflow-state-contract.md
+    - Full runtime contract lives in the trellis-kerminal CLI repo's
+      workflow-state-contract spec
 -->
 
 ## Phase Index
@@ -218,7 +218,7 @@ Sub-agent dispatch protocol: every dispatch prompt starts with `Active task: <ta
 
 [workflow-state:in_progress]
 Tools: on Kerminal, `trellis-implement` / `trellis-check` / `trellis-research` are skills under `.kerminal/skills/` — load the skill content and spawn a generic sub-agent with it. `trellis-update-spec` is a skill loaded in the main session.
-Flow: `trellis-implement` -> `trellis-check` -> `trellis-update-spec` -> commit (Phase 3.4) -> `/trellis:finish-work`.
+Flow: `trellis-implement` -> `trellis-check` -> `trellis-update-spec` -> commit (Phase 3.4) -> `trellis-finish-work`.
 Main-session default: dispatch implement/check sub-agents. Sub-agent self-exemption: if already running as `trellis-implement`, do NOT spawn another `trellis-implement` or `trellis-check`; if already running as `trellis-check`, do NOT spawn another `trellis-check` or `trellis-implement`. Dispatch is main session only.
 Dispatch prompt starts with `Active task: <task path from task.py current>`. Read context: jsonl entries -> `prd.md` -> `design.md if present` -> `implement.md if present`.
 [/workflow-state:in_progress]
@@ -240,7 +240,7 @@ Dispatch prompt starts with `Active task: <task path from task.py current>`. Rea
      channel as the live blocks. -->
 
 [workflow-state:completed]
-Code committed. Run `/trellis:finish-work`; if dirty, return to Phase 3.4 first.
+Code committed. Load `trellis-finish-work` (or say "finish the trellis task"); if dirty, return to Phase 3.4 first.
 [/workflow-state:completed]
 
 ### Rules
@@ -501,7 +501,7 @@ Update the docs under `.trellis/spec/` accordingly. Even if the conclusion is "n
 
 **Spec-sync preamble**: before drafting commits, ask: did this task fix a bug or surface non-obvious knowledge that should land in `.trellis/spec/` so future-you (or future-AI) doesn't repeat the mistake? If yes, return to Phase 3.3 first — spec writes belong in the same task's commit batch, not as a forgotten follow-up.
 
-The AI drives a batched commit of this task's code changes so `/finish-work` can run cleanly afterwards. Goal: produce work commits FIRST, then bookkeeping (archive + journal) commits land after — never interleaved.
+The AI drives a batched commit of this task's code changes so `trellis-finish-work` can run cleanly afterwards. Goal: produce work commits FIRST, then bookkeeping (archive + journal) commits land after — never interleaved.
 
 **Step-by-step**:
 
@@ -551,7 +551,7 @@ The AI drives a batched commit of this task's code changes so `/finish-work` can
 
 #### 3.5 Wrap-up reminder
 
-After the above, remind the user they can run `/finish-work` to wrap up (archive the task, record the session).
+After the above, remind the user they can ask to finish the trellis task to wrap up (archive the task, record the session).
 
 ---
 
@@ -564,7 +564,7 @@ This section is for developers who want to modify the Trellis workflow itself. A
 Edit the corresponding step's walkthrough body in the Phase 1 / 2 / 3 sections above. Critical invariants:
 - No active task must triage first and ask for task-creation consent before creating a Trellis task.
 - Planning must distinguish lightweight PRD-only tasks from complex tasks that require `prd.md`, `design.md`, and `implement.md` before start.
-- Every required execution path must keep the Phase 3.4 commit reminder reachable before `/trellis:finish-work`.
+- Every required execution path must keep the Phase 3.4 commit reminder reachable before `trellis-finish-work` runs.
 
 All tag blocks live in the `## Phase Index` section above, immediately after each phase summary:
 
@@ -613,7 +613,7 @@ Supported events: `after_create / after_start / after_finish / after_archive`. N
 
 ### Full contract
 
-For the workflow state machine's runtime contract, the locations of all status writers, pseudo-statuses (`no_task` / `stale_<source_type>`), the hook reachability matrix, and other deep details, see:
+For the workflow state machine's runtime contract, the locations of all status writers, pseudo-statuses (`no_task` / `stale_<source_type>`), and other deep details, see the workflow-state-contract spec in the trellis-kerminal CLI repo (https://github.com/Zhiwen-Liu/TrellisKerminal):
 
-- `.trellis/spec/cli/backend/workflow-state-contract.md` — runtime contract + writer table + test invariants
+- Runtime contract + writer table + test invariants
 - the workflow-state parser in `.trellis/scripts/common/` (reads workflow.md only, no embedded text)

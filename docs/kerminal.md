@@ -88,8 +88,9 @@ Rules:
 
 - Curate spec and research documents only — never code files (code is read
   during implementation).
-- The implement/check prelude loads exactly these files; entries pointing at
-  missing paths fall back to `prd.md` with a stderr warning.
+- The implement/check prelude loads exactly these files; if a manifest has no
+  curated entries, the prelude falls back to `prd.md` plus a spec-discovery
+  hint. Missing paths are flagged by `task.py validate`.
 - A task stays in PLANNING status until at least one curated entry exists.
 
 ## Updating and uninstalling
@@ -101,10 +102,23 @@ Rules:
   (skills, agent prompts, `.trellis/` scripts and workflow.md, `AGENTS.md`
   managed block). Your spec content and tasks are never overwritten.
 - `trellis uninstall` — permanently remove Trellis-managed surfaces from a
-  project (asks before deleting anything it did not write itself).
+  project. Files outside the tracked manifest are never touched; it asks for
+  one confirmation before deleting.
 - `trellis mem` — read local AI session stores (Kerminal's own
   `~/.kerminal/sessions/`, plus Claude Code / Codex / Devin / Grok / OpenCode /
   Pi / ZCode when present). Offline, read-only; `trellis mem help` for the
   subcommand surface.
 - `trellis workflow` — list (`--list`) or reset the project's
   `.trellis/workflow.md` to the bundled native template.
+
+### Environment variables
+
+| Variable | Effect |
+| --- | --- |
+| `TRELLIS_CONTEXT_ID` | Explicit session identity override for the task scripts. |
+| `TRELLIS_PYTHON_CMD` | Force a specific Python command for `trellis init`. |
+| `TRELLIS_SKIP_PYTHON_CHECK` | `1` skips the Python version probe at init. |
+| `TRELLIS_ALLOW_HOMEDIR` | `1` bypasses the home-directory guard for init/uninstall. |
+| `TRELLIS_ALLOW_DIRTY_UNINSTALL` | `1` allows uninstall with uncommitted changes. |
+| `TRELLIS_QUIET` | `1` silences the git-init hint during init. |
+| `DEBUG` / `TRELLIS_DEBUG` | Print stack traces on CLI errors. |

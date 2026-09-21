@@ -75,16 +75,6 @@ export interface AIToolConfig {
   defaultChecked: boolean;
   /** Whether this tool uses Python hooks (affects Windows encoding detection) */
   hasPythonHooks: boolean;
-  /**
-   * Optional user-global compatibility plugin for platform versions where
-   * project-level integration is unavailable. Trellis may surface a manual
-   * installation hint, but leaves installation and lifecycle management to
-   * the platform UI.
-   */
-  globalHookPlugin?: {
-    name: string;
-    marketplaceUrl: string;
-  };
   /** Template context for placeholder resolution in common templates */
   templateContext: TemplateContext;
 }
@@ -137,13 +127,6 @@ export const AI_TOOLS: Record<AITool, AIToolConfig> = {
 };
 
 /**
- * Get the configuration for a specific AI tool
- */
-export function getToolConfig(tool: AITool): AIToolConfig {
-  return AI_TOOLS[tool];
-}
-
-/**
  * Get all managed paths for a specific tool.
  */
 export function getManagedPaths(tool: AITool): string[] {
@@ -156,11 +139,4 @@ export function getManagedPaths(tool: AITool): string[] {
     paths.push(...config.extraManagedPaths);
   }
   return paths;
-}
-
-/**
- * Get template directories for a specific tool
- */
-export function getTemplateDirs(tool: AITool): TemplateDir[] {
-  return AI_TOOLS[tool].templateDirs;
 }

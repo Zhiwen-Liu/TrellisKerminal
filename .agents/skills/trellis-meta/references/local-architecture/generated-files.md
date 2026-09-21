@@ -28,24 +28,24 @@ This page only describes files that are visible and editable inside the user pro
 | `.trellis/tasks/` | Yes | Task material and research artifacts, maintained by the task workflow. |
 | `.trellis/workspace/` | Yes | Session records, usually written by `add_session.py`. |
 | `.trellis/scripts/` | Carefully | Local runtime. It can be customized, but only after understanding the call chain. |
-| `.trellis/.runtime/` | No | Runtime state, usually written automatically by hooks/scripts. |
+| `.trellis/.runtime/` | No | Runtime state, usually written automatically by scripts. |
 | `.trellis/.developer` | Carefully | Current developer identity. |
 | `.trellis/.version` | No | Trellis version record used by update/migration logic. |
 | `.trellis/.template-hashes.json` | No | Template hash record. Do not hand-write business rules here. |
 
 ## Platform Directories
 
-Different platforms generate different directories. Common categories:
+`trellis init` writes one platform surface:
 
-| Category | Example paths | Purpose |
-| --- | --- | --- |
-| hooks | `.claude/hooks/`, `.codex/hooks/`, `.cursor/hooks/` | Inject session context, workflow-state, and sub-agent context. |
-| settings | `.claude/settings.json`, `.codex/hooks.json`, `.qoder/settings.json`, `.trae/hooks.json` | Tell the platform when to run hooks or plugins. |
-| agents | `.claude/agents/`, `.codex/agents/`, `.kiro/agents/`, `.zcode/agents/` | Define agents such as `trellis-research`, `trellis-implement`, and `trellis-check`. |
-| skills | `.claude/skills/`, `.agents/skills/`, `.qoder/skills/`, `.zcode/skills/` | Skills that auto-trigger or can be read by AI. |
-| commands/prompts/workflows | `.cursor/commands/`, `.github/prompts/`, `.devin/workflows/`, `.zcode/commands/` | Explicit user-invoked command or workflow entry points. |
+| Path | Purpose |
+| --- | --- |
+| `AGENTS.md` | Project-level instruction file; the Trellis-managed block points the agent at `.trellis/` and the skills. |
+| `.kerminal/` | Kerminal-private skills (entry skills plus agent skills) and the `KERMINAL.md` operator guide. |
+| `.agents/skills/` | Shared skill root (agentskills.io standard): workflow skills plus bundled skills; Kerminal discovers it natively. |
 
-When modifying a platform directory, also confirm whether `.trellis/workflow.md` still describes the same flow.
+Earlier releases also generated per-platform hooks, settings, agents, and commands directories; those are gone.
+
+When modifying a platform file, also confirm whether `.trellis/workflow.md` still describes the same flow.
 
 ## Meaning Of Template Hashes
 
@@ -67,7 +67,7 @@ Editable by default:
 - `.trellis/config.yaml`
 - `.trellis/spec/**`
 - `.trellis/scripts/**`
-- Platform hooks, settings, agents, skills, commands, prompts, and workflows
+- Platform files: `AGENTS.md`, `.kerminal/`, `.agents/skills/`
 
 Do not edit by default:
 

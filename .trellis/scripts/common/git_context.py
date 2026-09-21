@@ -58,7 +58,7 @@ def main() -> None:
         "-m",
         choices=["default", "record", "packages", "phase"],
         default="default",
-        help="Output mode: default (full context), record (for record-session), packages (package info only), phase (workflow step extraction)",
+        help="Output mode: default (full context), record (for trellis-finish-work), packages (package info only), phase (workflow step extraction)",
     )
     parser.add_argument(
         "--step",
