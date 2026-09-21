@@ -176,3 +176,5 @@ tmp/
 tmp1/
 .playwright-mcp
 .codegraph/
+# Publish-time copy of root assets/ (created by prepublishOnly)
+packages/cli/assets/
