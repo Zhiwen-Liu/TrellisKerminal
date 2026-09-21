@@ -103,10 +103,10 @@ python3 ./.trellis/scripts/get_context.py --mode phase --step <X.Y>  # detailed 
 
   The [workflow-state:STATUS] blocks embedded in the ## Phase Index section
   below are the SINGLE source of truth for the per-turn `<workflow-state>`
-  breadcrumb that the workflow-state hook parses. There is no fallback
+  breadcrumb. The context pull parses them — there is no fallback
   dict baked into the scripts.
 
-  STATUS charset: [A-Za-z0-9_-]+. When the hook can't find a tag, it
+  STATUS charset: [A-Za-z0-9_-]+. When the parser can't find a tag, it
   degrades to a generic "Refer to workflow.md for current step." line —
   intentionally visible so users notice and fix a broken workflow.md.
 
@@ -234,7 +234,7 @@ Dispatch prompt starts with `Active task: <task path from task.py current>`. Rea
 <!-- Per-turn breadcrumb: shown while status='completed'.
      Currently DEAD in normal flow: cmd_archive writes status='completed' in
      the same call that moves the task dir to archive/, so the active-task
-     resolver loses the pointer and the hook never fires on archived tasks.
+     resolver loses the pointer; the breadcrumb therefore stops firing on archived tasks.
      Block preserved for a future status-transition redesign (e.g. an
      explicit in_progress→completed command). Edit through the same spec
      channel as the live blocks. -->

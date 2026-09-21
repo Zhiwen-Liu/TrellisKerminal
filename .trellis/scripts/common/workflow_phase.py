@@ -62,10 +62,11 @@ def _parse_marker(line: str) -> tuple[bool, list[str]] | None:
 def get_phase_index() -> str:
     """Return the compact Phase Index summary from workflow.md.
 
-    SessionStart and no-step phase context use this small summary as their
-    orientation payload. Detailed Phase 1/2/3 instructions are loaded with
-    ``get_step`` on demand. ``[workflow-state:STATUS]`` tag blocks are
-    consumed by the per-turn hook, so they're stripped from this output.
+    Session-start pulls and no-step phase context use this small summary as
+    their orientation payload. Detailed Phase 1/2/3 instructions are loaded
+    with ``get_step`` on demand. ``[workflow-state:STATUS]`` tag blocks are
+    appended separately (get_workflow_state_breadcrumb), so they're stripped
+    from this output.
     """
     text = _read_workflow()
     lines = text.splitlines()
@@ -88,7 +89,8 @@ def get_phase_index() -> str:
 
     section = "\n".join(lines[start:end]).rstrip()
     # Strip [workflow-state:STATUS]...[/workflow-state:STATUS] blocks since
-    # they're injected separately by inject-workflow-state.py per-turn.
+    # they're appended to context pulls separately (see
+    # get_workflow_state_breadcrumb).
     tag_re = re.compile(
         r"\[workflow-state:([A-Za-z0-9_-]+)\]\s*\n.*?\n\s*\[/workflow-state:\1\]\n?",
         re.DOTALL,
@@ -131,7 +133,7 @@ def get_step(step_id: str) -> str:
 
 
 def _platform_matches(platform: str, block_names: list[str]) -> bool:
-    """Case-insensitive fuzzy match: accept 'cursor', 'Cursor', 'claude-code', 'Claude Code'."""
+    """Case-insensitive fuzzy match on the block marker name."""
     needle = platform.lower().replace("-", "").replace("_", "").replace(" ", "")
     for name in block_names:
         hay = name.lower().replace("-", "").replace("_", "").replace(" ", "")
@@ -162,11 +164,9 @@ _PLATFORM_MARKER_LABELS: dict[str, str] = {
 def resolve_effective_platform(platform: str) -> str:
     """Map a platform id to its workflow.md marker label.
 
-    Platforms whose marker label differs from their id resolve through
-    ``_PLATFORM_MARKER_LABELS``. Everything else is returned unchanged.
-    (The upstream Codex dispatch-mode namespacing was removed with the
-    platform itself; any legacy ``codex`` value now passes through and
-    matches no block, which is the correct kerminal-only behavior.)
+    The label table exists to keep legacy installs resolving; a fresh
+    kerminal-only install only ever matches through ``kerminal`` (id equals
+    label). Everything else is returned unchanged.
     """
     return _PLATFORM_MARKER_LABELS.get(platform.strip().lower(), platform)
 

@@ -423,7 +423,7 @@ def _update_marker_path(repo_root: Path, context_key: str | None = None) -> Path
     """Path of the once-per-session marker that throttles the update check.
 
     `context_key` lets a caller that already resolved session identity pass it
-    in — the SessionStart hook reads the session id from hook stdin, which is
+    in — a hook-driven host reads the session id from hook stdin, which is
     more reliable than this function's environment-only fallback chain. Shell
     entry points leave it None and keep the previous behavior.
     """
@@ -461,9 +461,8 @@ def _mark_update_check_attempted(
 def get_update_hint(repo_root: Path, context_key: str | None = None) -> str | None:
     """Return the "update available" line for this session, at most once.
 
-    Public because the SessionStart hook imports it: the text-mode CLI path
-    (`get_context.py`) used to be the only caller, so hook-driven platforms —
-    Claude Code included — never saw the reminder at all.
+    Public so sub-modules (and the text-mode CLI path via `get_context.py`)
+    can share the once-per-session logic.
     """
     marker_path = _update_marker_path(repo_root, context_key)
     if marker_path.exists():
@@ -811,7 +810,7 @@ def get_context_record_json(repo_root: Path | None = None) -> dict:
 
 
 def get_context_text_record(repo_root: Path | None = None) -> str:
-    """Get context as formatted text for record-session mode.
+    """Get context as formatted text for the finish-work record flow.
 
     Focused output: MY ACTIVE TASKS first (with [!!!] emphasis),
     then GIT STATUS, RECENT COMMITS, CURRENT TASK.

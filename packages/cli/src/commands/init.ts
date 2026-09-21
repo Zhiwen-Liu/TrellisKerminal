@@ -11,7 +11,6 @@ import {
   resolveCliFlag,
   configurePlatform,
   getConfiguredPlatforms,
-  getPlatformsWithPythonHooks,
 } from "../configurators/index.js";
 import {
   getPythonCommandForPlatform,
@@ -216,30 +215,6 @@ export function resolveSupportedPython(): {
       `Probe results:\n  ${probeFailures.join("\n  ")}\n\n` +
       `Trellis init requires Python ≥ 3.9. ${installHint}\n` +
       `Last-resort escape hatch: set TRELLIS_SKIP_PYTHON_CHECK=1 to skip the probe entirely.`,
-  );
-}
-
-function getOsDisplayName(
-  platform: NodeJS.Platform = process.platform,
-): string {
-  switch (platform) {
-    case "win32":
-      return "Windows";
-    case "darwin":
-      return "macOS";
-    case "linux":
-      return "Linux";
-    default:
-      return platform;
-  }
-}
-
-function logPythonAdaptationNotice(command: string): void {
-  const osName = getOsDisplayName();
-  console.log(
-    chalk.blue(
-      `📌 ${osName} detected: Trellis rendered Python commands as "${command}" in generated hooks, settings, and help text`,
-    ),
   );
 }
 
@@ -1259,14 +1234,6 @@ export async function init(options: InitOptions): Promise<void> {
           nonInteractive: options.yes === true,
         });
       }
-    }
-
-    const pythonPlatforms = getPlatformsWithPythonHooks();
-    const hasSelectedPythonPlatform = pythonPlatforms.some((id) =>
-      tools.includes(AI_TOOLS[id].cliFlag),
-    );
-    if (hasSelectedPythonPlatform) {
-      logPythonAdaptationNotice(pythonCmd);
     }
 
     // Create root files (skip if exists)
