@@ -1,7 +1,7 @@
 {
   "name": "trellis-kerminal",
-  "version": "0.8.1",
-  "description": "TrellisKerminal \u2014 an engineering framework for Kerminal: specs, tasks, and memory persisted in your repo",
+  "version": "0.8.2",
+  "description": "TrellisKerminal — an engineering framework for Kerminal: specs, tasks, and memory persisted in your repo",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
