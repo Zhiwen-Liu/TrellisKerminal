@@ -37,8 +37,7 @@ In Kerminal:
 - `.agents/skills/` — auto-triggered workflow skills (`trellis-before-dev`,
   `trellis-brainstorm`, `trellis-check`, `trellis-break-loop`,
   `trellis-update-spec`) plus the bundled `trellis-meta` /
-  `trellis-spec-bootstrap` / `trellis-session-insight` skills. Byte-identical
-  to Codex / Gemini CLI / Pi / dsh writes into the same shared root.
+  `trellis-spec-bootstrap` / `trellis-session-insight` skills.
 - `.kerminal/skills/` — Kerminal-private entry skills (`trellis-start` /
   `trellis-continue` / `trellis-finish-work`) and the Trellis agent prompts
   (`trellis-implement` / `trellis-check` / `trellis-research`) used for

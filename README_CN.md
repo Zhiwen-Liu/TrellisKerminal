@@ -12,7 +12,7 @@
 </p>
 
 > [!NOTE]
-> **TrellisKerminal** 是 [mindfold-ai/Trellis](https://github.com/mindfold-ai/Trellis) 的 Kerminal 专用发行版：继承上游理念（把规范、任务、记忆沉淀进仓库），但只发布单个 `trellis-kerminal` npm 包，且仅支持 Kerminal 平台。文档以纯 Markdown 形式维护在本仓库的 [`docs/`](./docs/) 目录中。
+> **TrellisKerminal** 是面向 [Kerminal](https://kerminal.cn/) 的工程化框架：把规范、任务、记忆沉淀进仓库，让每一次编码会话都遵循团队标准。以单个 `trellis-kerminal` npm 包发布；文档以纯 Markdown 形式维护在 [`docs/`](./docs/) 目录中。
 
 <p align="center">
 <a href="./README.md">English</a> •
@@ -25,15 +25,8 @@
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-16a34a.svg?style=flat-square" alt="license" /></a>
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/stargazers"><img src="https://img.shields.io/github/stars/Zhiwen-Liu/TrellisKerminal?style=flat-square&color=eab308" alt="stars" /></a>
 <a href="./docs/"><img src="https://img.shields.io/badge/docs-markdown-0f766e?style=flat-square" alt="docs" /></a>
-<a href="https://discord.com/invite/tWcCZ3aRHc"><img src="https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord" /></a>
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/issues"><img src="https://img.shields.io/github/issues/Zhiwen-Liu/TrellisKerminal?style=flat-square&color=e67e22" alt="open issues" /></a>
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/pulls"><img src="https://img.shields.io/github/issues-pr/Zhiwen-Liu/TrellisKerminal?style=flat-square&color=9b59b6" alt="open PRs" /></a>
-<a href="https://deepwiki.com/mindfold-ai/Trellis"><img src="https://img.shields.io/badge/Ask-DeepWiki-blue?style=flat-square" alt="Ask DeepWiki" /></a>
-<a href="https://chatgpt.com/?q=Explain+the+project+mindfold-ai/Trellis+on+GitHub"><img src="https://img.shields.io/badge/Ask-ChatGPT-74aa9c?style=flat-square&logo=openai&logoColor=white" alt="Ask ChatGPT" /></a>
-</p>
-
-<p align="center">
-<img src="assets/trellis-demo-zh.gif" alt="Trellis 工作流演示" width="100%">
 </p>
 
 ## 为什么用 Trellis？
@@ -44,7 +37,7 @@
 | **任务驱动工作流** | PRD、实现上下文、审查上下文与任务状态统一存放于 `.trellis/tasks/`，AI 开发过程保持结构化、可追溯。 |
 | **项目记忆** | `.trellis/workspace/` 中的工作日志（journal）会保留上一次会话的脉络，因此每次新会话都能基于真实上下文开始。 |
 | **团队共享标准** | Spec 随仓库一同版本化，个人总结出的规则与流程可以直接成为整个团队的基础设施。 |
-| **Kerminal 优先** | 本 fork 仅演进 Kerminal 适配 —— 上游 Trellis 在 0.6.x 及之前支持 23 个 AI coding 平台（见上游仓库）。 |
+| **Kerminal 原生** | 为 Kerminal 的 pull-based 技能模型而生：入口技能、agent 提示词、通用子 agent 派发，无需 hooks。 |
 
 ## 前置要求
 
@@ -58,7 +51,7 @@
 npm install -g trellis-kerminal@latest
 
 # 2. 在你的仓库中用 Kerminal 初始化
-trellis init --kerminal -u your-name
+trellis init -u your-name
 
 # 3. 在 Kerminal 中打开项目，用自然语言描述需求
 ```
@@ -112,7 +105,7 @@ Trellis 内部运行一个 4 阶段循环，skill 与子代理均由系统自动
 <details>
 <summary><strong>Trellis 是否仅支持 Claude Code？</strong></summary>
 
-TrellisKerminal 仅支持 [Kerminal](https://kerminal.cn/) 这一个平台。上游 Trellis 曾支持 23 个平台；本发行版只发布 `trellis-kerminal` 一个 npm 包。
+是的，而且是有意为之。TrellisKerminal 仅支持 [Kerminal](https://kerminal.cn/) —— 整个工作流、技能集与更新管线都为它量身调优。
 
 </details>
 
@@ -137,32 +130,11 @@ TrellisKerminal 仅支持 [Kerminal](https://kerminal.cn/) 这一个平台。上
 
 </details>
 
-<details>
-<summary><strong>可以临时对比启用与关闭 Trellis 的项目表现吗？</strong></summary>
-
-可以。`trellis ablate` 会先在项目外创建并验证恢复事务，然后临时移除
-Trellis 管理的全部项目级表面。请新开一个 agent 会话进行对比；完成后运行
-`trellis restore`，即可精确恢复到消融前的状态。两个命令都支持
-`--dry-run` 预览。
-私有恢复事务会包含 `.trellis` 中 task、spec 和 workspace 的精确字节，
-其中可能有用户编写的敏感文本；事务会保留到恢复完成验证为止。
-
-它不同于永久删除的 `trellis uninstall`，也不同于只关闭 hooks 的
-`TRELLIS_HOOKS=0`。消融不会启动 agent、管理 worktree、隐藏 Git 变更，
-也不会删除全局 CLI、channel 日志或宿主会话记录。如果消融期间某个受管理
-路径被修改，恢复会拒绝全部写入，直到冲突被处理。
-
-</details>
-
-## Star 历史
-
-[![Star History Chart](https://star-history.dera.page/svg?repos=mindfold-ai/Trellis&type=Date)](https://star-history.dera.page/#mindfold-ai/Trellis&Date)
-
 ## 社区与资源
 
 - [文档（Markdown）](./docs/)
 - [GitHub Issues](https://github.com/Zhiwen-Liu/TrellisKerminal/issues)
-- [Discord](https://discord.com/invite/tWcCZ3aRHc)（上游社区）
+- [GitHub Discussions](https://github.com/Zhiwen-Liu/TrellisKerminal/discussions)
 
 ### 联系我们
 
@@ -174,7 +146,6 @@ Trellis 管理的全部项目级表面。请新开一个 agent 会话进行对�
 
 <p align="center">
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal">TrellisKerminal</a> •
-<a href="https://github.com/mindfold-ai/Trellis">上游仓库</a> •
 <a href="./LICENSE">AGPL-3.0 License</a> •
-由 <a href="https://github.com/mindfold-ai">Mindfold</a> 构建，fork 由 <a href="https://github.com/Zhiwen-Liu">Zhiwen-Liu</a> 维护
+由 <a href="https://github.com/Zhiwen-Liu">Zhiwen-Liu</a> 构建
 </p>

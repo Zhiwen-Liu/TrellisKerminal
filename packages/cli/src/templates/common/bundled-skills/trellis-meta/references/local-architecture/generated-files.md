@@ -77,4 +77,4 @@ Do not edit by default:
 - Concrete state files under `.trellis/.runtime/**`
 - Hash contents inside `.trellis/.template-hashes.json`
 
-Switch to the Trellis CLI source-code perspective only when the user explicitly wants to contribute upstream.
+Switch to the trellis-kerminal CLI source-code perspective only when the user explicitly wants to contribute to the trellis-kerminal CLI repo.

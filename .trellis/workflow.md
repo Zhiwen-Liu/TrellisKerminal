@@ -103,9 +103,8 @@ python3 ./.trellis/scripts/get_context.py --mode phase --step <X.Y>  # detailed 
 
   The [workflow-state:STATUS] blocks embedded in the ## Phase Index section
   below are the SINGLE source of truth for the per-turn `<workflow-state>`
-  breadcrumb that every supported AI platform's UserPromptSubmit hook
-  reads. The workflow-state hook parses them — there is no
-  fallback dict baked into the scripts after v0.5.0-rc.0.
+  breadcrumb that the workflow-state hook parses. There is no fallback
+  dict baked into the scripts.
 
   STATUS charset: [A-Za-z0-9_-]+. When the hook can't find a tag, it
   degrades to a generic "Refer to workflow.md for current step." line —
@@ -556,7 +555,7 @@ After the above, remind the user they can run `/finish-work` to wrap up (archive
 
 ---
 
-## Customizing Trellis (for forks)
+## Customizing Trellis
 
 This section is for developers who want to modify the Trellis workflow itself. All customization is done by editing this file; the scripts are parsers only.
 

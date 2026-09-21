@@ -58,7 +58,7 @@ Not every platform has every hook. Do not copy files from another platform just 
 
 1. **Settings wire things up; hooks define behavior**. If only the hook changes, the platform may never call it. If only settings change, behavior may not change.
 2. **Confirm platform event names first**. Different platforms use different names for SessionStart, UserPromptSubmit, AgentSpawn, shell execution, and similar events.
-3. **Hooks read local `.trellis/`, not upstream source**. `.trellis/scripts/` and `.trellis/workflow.md` in the user project are the default targets.
+3. **Hooks read local `.trellis/`, not the trellis-kerminal CLI source**. `.trellis/scripts/` and `.trellis/workflow.md` in the user project are the default targets.
 4. **Errors must be visible**. Hook failures should tell the user what was not injected instead of silently leaving the AI without context.
 
 ## Troubleshooting Path

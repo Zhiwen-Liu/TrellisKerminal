@@ -20,26 +20,9 @@ Agent files should not become generic chat prompts. They should define input sou
 
 ## Common Paths
 
-| Platform | Agent path |
+| Platform | Agent file location |
 | --- | --- |
-| Claude Code | `.claude/agents/trellis-*.md` |
-| Cursor | `.cursor/agents/trellis-*.md` |
-| OpenCode | `.opencode/agents/trellis-*.md` |
-| Codex | `.codex/agents/trellis-*.toml` |
-| Kiro | `.kiro/agents/trellis-*.json` |
-| Gemini CLI | `.gemini/agents/trellis-*.md` |
-| Qoder | `.qoder/agents/trellis-*.md` |
-| CodeBuddy | `.codebuddy/agents/trellis-*.md` |
-| Factory Droid | `.factory/droids/trellis-*.md` |
-| Pi Agent | `.pi/agents/trellis-*.md` |
-| Reasonix | `.reasonix/skills/trellis-*/SKILL.md` (subagent frontmatter) |
-| ZCode | `.zcode/agents/trellis-*.md` |
-| Kimi Code | `.kimi-code/agents/trellis-*.md` (custom sub-agents; the same prompts also ship as `.kimi-code/skills/trellis-*/SKILL.md`) |
 | Kerminal | No `agents/` directory — agent prompts ship as `.kerminal/skills/trellis-*/SKILL.md` and are dispatched as generic sub-agents |
-
-GitHub Copilot agent/prompt support is provided by a combination of directories such as `.github/agents/`, `.github/prompts/`, and `.github/skills/`; inspect the files actually generated in the user project.
-
-Main-session workflow platforms such as Kilo, Antigravity, and Devin may not have Trellis sub-agent files. They usually rely on workflows/skills to guide the main session.
 
 ## Two Context Loading Modes
 
@@ -77,8 +60,8 @@ This mode fits platforms whose hooks cannot reliably rewrite sub-agent prompts.
 1. **Keep responsibilities single-purpose**. Do not mix research, implement, and check responsibilities into one agent.
 2. **Specify the read order**. Agents must know to start from the active task, read jsonl/spec context, then read `prd.md`, `design.md` if present, and `implement.md` if present.
 3. **Specify write boundaries**. Research usually only writes `research/`; implement can write code; check can fix issues.
-4. **Keep semantics synchronized in multi-platform projects**. If the user configured Claude, Codex, and Cursor together, decide whether changes to one platform's agent also need to be applied to others.
+4. **Keep semantics synchronized with the shared flow**. When an agent prompt changes, check whether `.trellis/workflow.md` and the related entry skills still agree.
 
-## Do Not Default To Editing Upstream Templates
+## Do Not Default To Editing The Bundled Templates In The trellis-kerminal CLI Repo
 
-Local AI should default to modifying platform agent files inside the user project. Discuss upstream template source only when the user explicitly wants to contribute the change back to Trellis.
+Local AI should default to modifying the agent skill files inside the user project. Discuss the bundled templates in the trellis-kerminal CLI repo only when the user explicitly wants to contribute the change back to Trellis.

@@ -1,21 +1,20 @@
 ---
 name: contribute
-description: "Guide for contributing to TrellisKerminal. Covers the single-repo layout, where docs and skill templates live, keeping README languages in sync, and submitting PRs to the fork. Use when someone wants to add or update documentation, add or modify a bundled/workflow skill template, or submit a PR to this project."
+description: "Guide for contributing to TrellisKerminal. Covers the single-repo layout, where docs and skill templates live, keeping README languages in sync, and submitting PRs. Use when someone wants to add or update documentation, add or modify a bundled/workflow skill template, or submit a PR to this project."
 ---
 
 # Contributing to TrellisKerminal
 
-TrellisKerminal is the Kerminal-only distribution of upstream
-[mindfold-ai/Trellis](https://github.com/mindfold-ai/Trellis). Unlike upstream,
-everything lives in **this one repo** — there is no separate docs repo and no
-`marketplace/` submodule.
+TrellisKerminal is an engineering framework for
+[Kerminal](https://kerminal.cn/). Everything lives in **this one repo** —
+docs are plain Markdown under `docs/`.
 
 | What | Where in this repo |
 |------|-------------------|
 | User documentation | `docs/` (plain Markdown) |
 | Readme / marketing | `README.md` + `README_CN.md` (root) |
 | Workflow skills (`trellis-brainstorm`, `trellis-before-dev`, `trellis-check`, `trellis-break-loop`, `trellis-update-spec`) | `packages/cli/src/templates/common/skills/` |
-| Bundled skills (`trellis-meta`, `trellis-spec-bootstrap`, `trellis-session-insight`, `trellis-channel`) | `packages/cli/src/templates/common/bundled-skills/` |
+| Bundled skills (`trellis-meta`, `trellis-spec-bootstrap`, `trellis-session-insight`) | `packages/cli/src/templates/common/bundled-skills/` |
 | Entry command skills (`trellis-start`, `trellis-continue`, `trellis-finish-work`) | `packages/cli/src/templates/common/commands/` |
 | Kerminal platform files (`.kerminal/` content, incl. agent prompts) | `packages/cli/src/templates/kerminal/` |
 | Shared `.trellis/` runtime (scripts, `workflow.md`, agents, task templates) | `packages/cli/src/templates/trellis/` |
@@ -40,10 +39,9 @@ overwrites your work.
 - Pages live in `docs/` as plain Markdown — edit them directly.
 - `README.md` and `README_CN.md` must stay in sync: any change to one
   language needs the same change in the other.
-- Keep the fork positioning accurate: TrellisKerminal = Kerminal-only,
-  single npm package `trellis-kerminal`. Link upstream
-  (mindfold-ai/Trellis) only for attribution, never as the place to file
-  issues/PRs.
+- Keep the project positioning accurate: TrellisKerminal is a standalone
+  project for Kerminal, published as the single npm package
+  `trellis-kerminal`. Issues and PRs all happen in this repo.
 
 ## Contributing a Skill or Workflow Change
 

@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing to TrellisKerminal! This document provides guidelines for contributing to the project.
 
-TrellisKerminal is the Kerminal-only distribution of [mindfold-ai/Trellis](https://github.com/mindfold-ai/Trellis): a single `trellis-kerminal` npm package with Kerminal as the only supported platform. Everything lives in this one repo — there is no separate docs repo and no marketplace submodule.
+TrellisKerminal is an engineering framework for [Kerminal](https://kerminal.cn/), shipped as a single `trellis-kerminal` npm package. Everything lives in this one repo — docs are plain Markdown under `docs/`.
 
 ## Ways to Contribute
 
@@ -25,7 +25,7 @@ Feature requests are welcome! Please open an issue with:
 - Use case / problem it solves
 - Any implementation ideas (optional)
 
-Note: the supported platform surface is intentionally limited to Kerminal. Features that only make sense for other AI hosts usually belong [upstream](https://github.com/mindfold-ai/Trellis) instead.
+Note: the supported platform surface is intentionally limited to Kerminal. Features targeting other AI hosts are out of scope for this project.
 
 ### Improving Documentation
 

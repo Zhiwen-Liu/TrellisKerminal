@@ -1,7 +1,8 @@
 # `tl mem` — Cross-Platform AI Session Memory
 
 How Trellis indexes, searches, and extracts dialogue from on-disk session files
-written by Claude Code, Codex, Devin CLI, OpenCode, Pi Agent, and ZCode.
+written by Kerminal, Claude Code, Codex, Grok, Devin CLI, OpenCode, Pi Agent,
+and ZCode.
 
 The retrieval engine lives in the core mem module (`packages/cli/src/core/mem/`);
 `packages/cli/src/commands/mem.ts` is a thin CLI wrapper over it. See "Package
@@ -51,8 +52,8 @@ invoked from the `tl` Commander wire.
 
 **Core owns** (`packages/cli/src/core/mem/`, public surface at `mem/index.ts` — **not** the `src/core/` root barrel):
 
-- persisted-session readers / adapters for Kerminal, Claude Code, Codex, Devin CLI, OpenCode, Pi,
-  and ZCode (`adapters/{kerminal,claude,codex,devin,opencode,pi,zcode}.ts`; the Kerminal
+- persisted-session readers / adapters for Kerminal, Claude Code, Codex, Grok, Devin CLI, OpenCode, Pi,
+  and ZCode (`adapters/{kerminal,claude,codex,grok,devin,opencode,pi,zcode}.ts`; the Kerminal
   adapter reuses the Codex rollout engine — Kerminal writes Codex-format JSONL)
 - search, relevance scoring, excerpt selection (`search.ts`)
 - dialogue cleaning (`dialogue.ts`), filtering (`filter.ts`)
@@ -69,7 +70,8 @@ invoked from the `tl` Commander wire.
 - `runMem`, argv parsing (`parseArgv`), and CLI flag → `MemFilter` translation
 - terminal rendering: `printSessions`, `shortDate`, `shortPath`, row formatting
 - `--json` output shaping (preserving the stable JSON field names)
-- the OpenCode-unavailable stderr notice (`warnOpencodeUnavailable`)
+- warning rendering: core `MemWarning`s are mapped to stderr `warning:` lines
+  (`commands/mem.ts:printWarnings`)
 - `process.exit` codes and `die`
 
 The CLI imports core through the public subpath only:
@@ -108,7 +110,7 @@ Cross-cutting (`buildFilter`):
 
 | Flag                                          | Default         | Notes                                                                                                                                                                |
 | --------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--platform claude\|codex\|devin\|grok\|opencode\|pi\|zcode\|all` | `all` | Validated by the CLI against the `MemSourceFilter` union (hand-written guard, no zod). Unknown value → exit 2. `devin` is Cognition Devin CLI, not `trellis init --devin`. |
+| `--platform claude\|codex\|devin\|grok\|kerminal\|opencode\|pi\|zcode\|all` | `all` | Validated by the CLI against the `MemSourceFilter` union (hand-written guard, no zod; the canonical order is `MEM_SOURCE_KINDS` in `core/mem/types.ts`). Unknown value → exit 2. `devin` is Cognition Devin CLI, not `trellis init --devin`. |
 | `--since YYYY-MM-DD`                          | none            | Inclusive lower bound. Parsed by `new Date(value)`; invalid → exit 2.                                                                                                |
 | `--until YYYY-MM-DD`                          | none            | Inclusive upper bound; parser appends `T23:59:59.999Z` so a date string covers the whole UTC day.                                                                    |
 | `--cwd <path>`                                | `process.cwd()` | Project scope. Resolved with `path.resolve`. Combined with `--global` → `--global` wins.                                                                             |
@@ -123,7 +125,7 @@ Subcommand-specific:
 | `--turns N`          | `context`            | `3`                   | Number of hit turns to surface.                                                                                                                                    |
 | `--around M`         | `context`            | `1`                   | Turns of context on either side of each hit; deduped via `Set`.                                                                                                    |
 | `--max-chars N`      | `context`            | `6000` (~1500 tokens) | Total char budget. Per-turn cap is `floor(N/2)`; turns exceeding it are head-truncated with `…[+X chars]`.                                                         |
-| `--include-children` | `search`, `context`  | off                   | Merge OpenCode sub-agent descendants into parent before search/context (only OpenCode populates `parent_id`). No-op in 0.6.0-beta.4 (OpenCode reader unavailable). |
+| `--include-children` | `search`, `context`  | off                   | Merge OpenCode sub-agent descendants into parent before search/context (only OpenCode populates `parent_id`). |
 | `--json`             | all                  | off                   | Machine-readable output for AI consumption.                                                                                                                        |
 
 ---
@@ -335,41 +337,36 @@ zero-dependency parser as ZCode / OpenCode. This is **not** `trellis init
 - **Out of v1**: Devin Cloud, Desktop Cascade, `transcripts/*.json`,
   `--include-children` (local `subagent_heads` is unused).
 
-### OpenCode (reader unavailable as of 0.6.0-beta.4+)
+### OpenCode (SQLite reader, zero-dependency)
 
-In 0.6.0-beta.3 a SQLite-backed reader was added for OpenCode 1.2+
-(which migrated from JSON tree to `~/.local/share/opencode/opencode.db`).
-That release relied on a `better-sqlite3` native dependency that broke
-installation on Windows + restricted networks (China, corporate
-firewalls): `prebuild-install` timed out fetching binaries, the fallback
-`node-gyp` rebuild required VS2017+ build tools, and `trellis` failed to
-install at all on machines that did not have a C toolchain. 0.6.0-beta.4
-reverted the dependency. See `quality-guidelines.md` "Native dependency
-policy" for the broader rule.
+The OpenCode adapter reads the OpenCode 1.2+ store at
+`~/.local/share/opencode/opencode.db` (SQLite, WAL mode) through the
+zero-dependency parser in `core/mem/internal/sqlite-readonly.ts` plus the
+prepared-store plumbing in `internal/sqlite-adapter.ts` — no native module,
+no WASM blob, no system `sqlite3` shell-out, no install-time build step. It
+reads the `session` / `message` / `part` tables (schema confirmed against a
+live 1.18 store; see the adapter header). Reading is snapshot-based and
+strictly read-only: the db is parsed, never opened for write, locked, or
+checkpointed. Search prepares one whole-db store
+(`prepareOpencodeSessionStore`) and releases it in `finally`
+(`releaseOpencodeSessionStore`) so per-session reads reuse it instead of
+re-parsing.
 
-Current behavior:
+History: 0.6.0-beta.3 shipped a `better-sqlite3`-backed reader that broke
+installation on Windows + restricted networks (China, corporate firewalls) —
+`prebuild-install` timed out fetching binaries, the fallback `node-gyp`
+rebuild required VS2017+ build tools, and `trellis` failed to install at all
+on machines without a C toolchain. 0.6.0-beta.4 reverted the dependency and
+the platform read empty for a while; the pure-JS reader above re-enabled it.
+No native dependency may come back with this adapter — see
+`quality-guidelines.md` "Native dependency policy" for the broader rule.
 
-- `opencodeListSessions` returns `[]`.
-- `opencodeExtractDialogue` returns `[]`.
-- `opencodeSearch` returns an empty hit.
-- All three call `warnOpencodeUnavailable()` which writes one stderr line
-  per process (cached via module-level flag).
-
-Re-enabling OpenCode requires an install-resilient backend. Acceptable
-options, ordered by preference:
-
-1. **Pure-JS / WASM** — `sql.js` bundled WASM. No native build, identical
-   bytes on every platform, slightly higher memory cost.
-2. **Shell-out** — invoke the user's system `sqlite3` CLI when present;
-   skip OpenCode with a clear message when absent. No native build, zero
-   bundle cost, depends on host.
-3. **`node:sqlite`** — once it graduates from experimental in Node LTS.
-   Native but ships with the runtime, no install-time compile.
-4. **`optionalDependencies` + soft-degrade** — only as a last resort, and
-   only if the soft-degrade path matches today's "empty list + one-shot
-   warning" UX exactly so a missing dep does not regress install reliability.
-
-See follow-up task notes.
+Phase: `phaseSupported: false` in `core/mem/platforms.ts`. `--phase
+brainstorm|implement` on an OpenCode session does not slice —
+`sessions.ts:sliceMemPhase` degrades to the full cleaned dialogue plus one
+`opencode-phase-unsupported` warning ("`--phase <phase> on platform=opencode
+is not yet supported; returning full dialogue.`"). `--phase all` and phase-less
+`context` / `extract` never warn.
 
 ### `SessionInfo` contract
 
@@ -378,7 +375,7 @@ Every list function emits items conforming to the `MemSessionInfo` type
 
 | Field       | Required      | Source                                                                                                                                                  |
 | ----------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `platform`  | yes           | `claude` / `codex` / `devin` / `grok` / `opencode` / `pi` / `zcode`                                                                                    |
+| `platform`  | yes           | `claude` / `codex` / `kerminal` / `grok` / `devin` / `opencode` / `pi` / `zcode`                                                                                      |
 | `id`        | yes           | platform session id                                                                                                                                     |
 | `title`     | optional      | Claude index `title`, OpenCode `title`, Devin `sessions.title`, Pi latest `session_info.name`; Codex has no title                                       |
 | `cwd`       | optional      | OpenCode `directory`, Claude index/event `cwd`, Codex first-event `payload.cwd`, Pi session header `cwd`, Devin `working_directory`                     |
@@ -570,7 +567,7 @@ never absorb children.
 - **No write path**: `mem` never modifies session files, indexes, or any other
   state. It is a strict reader.
 - **No remote/cloud sync**: OpenCode's optional cloud sync is invisible here.
-  Local OpenCode reading is also unavailable in 0.6.0-beta.4 (reverted — see
+  Local OpenCode reading goes through the zero-dependency SQLite reader (see
   the OpenCode section above).
 - **No transitive dependency on Trellis runtime**: `core/mem/` does not import
   from `configurators/`, `migrations/`, `templates/`, or `.trellis/scripts`,
@@ -811,10 +808,11 @@ machine-readable stdout used by `--json` consumers.
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | Claude   | Native — boundary detection on `tool_use` (Bash) blocks in raw JSONL                                                                        |
 | Codex    | Native — boundary detection on `function_call` events whose `name` is `exec_command` or `shell` (Codex's Bash twin)                         |
+| Kerminal | Native — same Codex rollout engine (`adapters/kerminal.ts` binds `adapters/codex.ts`'s parameterized reader to the Kerminal root)           |
 | Pi       | Native — boundary detection on assistant `toolCall` blocks named `bash` / `shell` and `bashExecution.command` messages on the active branch |
 | ZCode    | Native — boundary detection on `part.data` Bash tool records after compaction has selected the effective dialogue                         |
 | Devin    | Native — `exec` tool_calls' `arguments.command`                                                                                            |
-| OpenCode | Reader unavailable in 0.6.0-beta.4+ (returns empty + warning)                                                                               |
+| OpenCode | Not supported (`phaseSupported: false`) — `--phase` degrades to full dialogue + `opencode-phase-unsupported` warning                        |
 
 `core/mem/adapters/codex.ts:collectCodexTurnsAndEvents` is the Codex twin of
 `collectClaudeTurnsAndEvents`. Same single-pass shape: it produces both the
@@ -1061,7 +1059,7 @@ CLI tests (`packages/cli/test/commands/`):
 | File                      | What it covers                                                                                                        |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `mem-helpers.test.ts`     | CLI-only helpers: `parseArgv`, CLI flag → `MemFilter` translation, `shortDate`, `shortPath`                           |
-| `mem-integration.test.ts` | end-to-end `runMem` with stdout capture, `--json` output shape, exit behavior, the OpenCode-unavailable stderr notice |
+| `mem-integration.test.ts` | end-to-end `runMem` with stdout capture, `--json` output shape, exit behavior, warning rendering |
 
 ### Fixture pattern (core adapter tests)
 
@@ -1076,8 +1074,9 @@ Mandatory for any new platform-parser test in `packages/cli/test/core/mem/`:
 3. **`await import("../../src/mem/adapters/...")`** _after_ the mock is set up.
 4. **Per-test fixture seeding**: write minimal JSONL / JSON files into
    `<fakeHome>/.claude/projects/...` or `<fakeHome>/.codex/sessions/...`.
-   OpenCode fixture seeding is not applicable in 0.6.0-beta.4 — the reader
-   is a degraded no-op and tests assert "returns empty".
+   OpenCode fixtures instead seed a minimal `opencode.db` SQLite file under
+   `<fakeHome>/.local/share/opencode/` (see the OpenCode block in
+   `adapters.test.ts` for the row shapes).
 5. **`utimesSync`** is the canonical way to anchor `mtime` for `updated`
    assertions — `fs.statSync(file).mtime` is what the adapters read.
 6. **`afterEach`** cleans up its own fixture files; tests must be isolated
@@ -1146,7 +1145,7 @@ subpath surface — the CLI must not deep-import them.
 | `shortDate`, `shortPath`                                     | terminal formatting — tested directly        |
 
 The CLI wrapper composes the core API, renders results, maps warnings to
-stderr, emits the OpenCode-unavailable notice, and owns exit codes.
+stderr, and owns exit codes.
 
 ---
 

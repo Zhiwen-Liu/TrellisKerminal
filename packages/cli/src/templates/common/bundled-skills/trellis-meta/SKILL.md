@@ -7,14 +7,14 @@ description: "Understand and customize the local Trellis architecture inside a u
 
 This skill is for local Trellis users who have already run `trellis init` in a project. After reading it, an AI should understand the Trellis architecture, operating model, and customization entry points inside that user project, then modify the generated `.trellis/` and platform directory files according to the user's request.
 
-Trellis v0.6 adds two architectural surfaces on top of the pre-v0.6 workflow / persistence / platform model. First, cross-session memory: `trellis mem list | search | context | extract | projects` reads raw Claude Code, Codex, and Pi Agent JSONL already on disk, slices by `--phase brainstorm|implement|all`, and never uploads anything. Second, a single-package npm release: `trellis-kerminal` ships the CLI and the reusable core primitives (task, mem, testing) together on one version. Treat these as first-class customization surfaces alongside the per-platform integration files.
+Trellis has two architectural surfaces beyond the workflow / persistence / platform model. First, cross-session memory: `trellis mem list | search | context | extract | projects` reads raw conversation logs already on disk from eight data sources (kerminal, claude, codex, devin, grok, opencode, pi, zcode), slices by `--phase brainstorm|implement|all`, and never uploads anything. Second, a single-package npm release: `trellis-kerminal` ships the CLI and the reusable core primitives (task, mem, testing) together on one version. Treat these as first-class customization surfaces alongside the Kerminal integration files.
 
 The default operating scope is local files in the user project:
 
 - `.trellis/`: workflow, config, tasks, spec, workspace, scripts, and runtime state.
-- Platform directories: `.claude/`, `.codex/`, `.cursor/`, `.opencode/`, `.kiro/`, `.gemini/`, `.qoder/`, `.codebuddy/`, `.github/`, `.factory/`, `.pi/`, `.reasonix/`, `.kilocode/`, `.agent/`, `.devin/`, `.kimi-code/`, and similar directories. Pi additionally exposes a native `trellis_subagent` tool with `single` / `parallel` / `chain` dispatch modes, throttled progress cards, and `isTrellisAgent()` validation on top of the file layout. Reasonix stores both workflow skills and subagent skills as `.reasonix/skills/<name>/SKILL.md`; subagent skills carry `runAs: subagent` frontmatter. Kimi Code keeps workflow skills in the shared `.agents/skills/` layer, delivers commands plus agent prompts as `.kimi-code/skills/<name>/SKILL.md`, and installs the same agent prompts as custom sub-agents under `.kimi-code/agents/<name>.md`.
-- Shared skill layer: `.agents/skills/`.
-- Raw platform conversation logs queryable via `trellis mem`: `~/.claude/projects/`, `~/.codex/sessions/`, and `~/.pi/agent/sessions/` (OpenCode adapter degraded for the v0.6 line).
+- Platform files: `AGENTS.md` at the project root (the project-level instruction file Kerminal reads directly) and `.kerminal/` (user-invocable entry skills under `.kerminal/skills/` plus the `.kerminal/KERMINAL.md` operator guide). Kerminal has no project-level sub-agent registry — agent prompts ship as skills under `.kerminal/skills/`, and the main session loads one and spawns a generic sub-agent with its content.
+- Shared skill layer: `.agents/skills/` (the agentskills.io shared standard) — workflow skills plus all bundled skills land here, and Kerminal discovers this root natively.
+- Raw conversation logs queryable via `trellis mem` from eight data sources (kerminal, claude, codex, devin, grok, opencode, pi, zcode): e.g. `~/.kerminal/sessions/`, `~/.claude/projects/`, and `~/.codex/sessions/`.
 
 Do not assume the user has the Trellis source repository. Do not default to modifying the global npm install directory or `node_modules` — `trellis-kerminal` ships as a published package with one version and one git tag per release.
 
@@ -36,14 +36,14 @@ Do not assume the user has the Trellis source repository. Do not default to modi
 - `references/local-architecture/spec-system.md`: How `.trellis/spec/` is organized, injected, and refreshed from a `registry.spec` source.
 - `references/local-architecture/workspace-memory.md`: `.trellis/workspace/` journals plus `trellis mem` cross-session recall and the core mem module shipped inside `trellis-kerminal`.
 - `references/local-architecture/context-injection.md`: Hooks and sub-agent preludes that inject session, workflow, spec, and task context.
-- `references/local-architecture/bundled-skills.md`: Auto-dispatched bundled skills (`trellis-meta`, `trellis-spec-bootstrap`, `trellis-session-insight`) and how `getBundledSkillTemplates()` ships them to every platform skill root.
+- `references/local-architecture/bundled-skills.md`: Auto-dispatched bundled skills (`trellis-meta`, `trellis-spec-bootstrap`, `trellis-session-insight`) and how `getBundledSkillTemplates()` ships them to the shared `.agents/skills/` root.
 
 ### Platform Files
 
-- `references/platform-files/overview.md`: How shared `.trellis/` files relate to platform directories and the three platform integration modes (hook-driven, agent prelude, main-session workflow).
-- `references/platform-files/platform-map.md`: Platform directories and paths for skills, agents, hooks, and extensions across all supported platforms including Reasonix and Pi's native `trellis_subagent` extension.
+- `references/platform-files/overview.md`: How shared `.trellis/` files relate to Kerminal platform files and the pull-based integration mode (no hooks; skills loaded on demand; `AGENTS.md` managed block as the entry pointer).
+- `references/platform-files/platform-map.md`: Kerminal file locations — `AGENTS.md`, `.kerminal/`, `.agents/skills/` — and how the pieces fit together.
 - `references/platform-files/hooks-and-settings.md`: How settings/config files, hooks, plugins, and extensions connect to Trellis.
-- `references/platform-files/agents.md`: Per-platform `trellis-research` / `trellis-implement` / `trellis-check` sub-agent files.
+- `references/platform-files/agents.md`: The `trellis-research` / `trellis-implement` / `trellis-check` agent prompt skills under `.kerminal/skills/` and their shared responsibilities.
 - `references/platform-files/skills-and-commands.md`: Differences between skills, commands, prompts, and workflows, plus how to change them.
 
 ### Local Customization
@@ -54,7 +54,7 @@ Do not assume the user has the Trellis source repository. Do not default to modi
 - `references/customize-local/change-context-loading.md`: Change how tasks, specs, journals, hook context, and `trellis mem` recall are loaded.
 - `references/customize-local/change-hooks.md`: Change platform hooks, settings, task lifecycle hooks (`hooks.after_*`), and shell session bridges.
 - `references/customize-local/change-agents.md`: Change research, implement, and check agent behavior across platform sub-agents.
-- `references/customize-local/change-skills-or-commands.md`: Add or modify local skills, commands, prompts, and workflows; covers upstream bundled-skill auto-dispatch.
+- `references/customize-local/change-skills-or-commands.md`: Add or modify local skills, commands, prompts, and workflows; covers auto-dispatch of bundled skills maintained in the trellis-kerminal CLI repo.
 - `references/customize-local/change-spec-structure.md`: Adjust the project spec structure under `.trellis/spec/`, including registry-backed sources.
 - `references/customize-local/add-project-local-conventions.md`: Put team rules into project-local specs or local skills.
 
@@ -65,13 +65,13 @@ Do not assume the user has the Trellis source repository. Do not default to modi
 - `.trellis/spec/` stores the user's project-specific coding conventions and design constraints. When `registry.spec` is set, files are refreshed by `trellis update`; local edits surface as "modified by user" conflicts in `.trellis/.template-hashes.json`.
 - `.trellis/tasks/` stores task PRDs, design notes, implement plans, research files, and JSONL context. Tasks form parent/child trees: `task.py create --parent <slug>`, `task.py add-subtask <parent> <child>`, `task.py remove-subtask <parent> <child>`, and `task.py list-context <task>`. `task.py create` rejects a slug already present in `.trellis/tasks/archive/**`.
 - `.trellis/workspace/` stores **deliberately written** developer journals. Raw cross-session dialogue is **not** stored here — it lives on disk under `~/.claude/projects/`, `~/.codex/sessions/`, and `~/.pi/agent/sessions/` and is recovered via `trellis mem search|extract|context`. The bundled `trellis-session-insight` skill teaches when to reach for `mem`.
-- Bundled multi-file skills (`trellis-meta`, `trellis-spec-bootstrap`, `trellis-session-insight`) are auto-dispatched to every platform skill root by `getBundledSkillTemplates()` in `packages/cli/src/templates/common/index.ts`. Dropping a new directory under `packages/cli/src/templates/common/bundled-skills/` (upstream) ships it to every platform on the next `trellis update`.
-- Platform settings/config files decide which hooks, agents, skills, commands, prompts, and workflows actually run. Reasonix has no settings file — behavior is encoded inside skill frontmatter.
+- Bundled multi-file skills (`trellis-meta`, `trellis-spec-bootstrap`, `trellis-session-insight`) are auto-dispatched to the shared `.agents/skills/` root by `getBundledSkillTemplates()` in `packages/cli/src/templates/common/index.ts`. Dropping a new directory under `packages/cli/src/templates/common/bundled-skills/` in the trellis-kerminal CLI repo ships it to `.agents/skills/` on the next `trellis update`.
+- Kerminal has no settings/config file — which skills, commands, prompts, and workflows actually run is decided by the files under `.agents/skills/` and `.kerminal/skills/` plus the pull-based prelude.
 - `.trellis/.template-hashes.json` and `.trellis/.runtime/` are management/runtime state files. Confirm necessity before editing them.
 
 ## Do Not
 
-- Do not treat Trellis upstream source code as the default target for local customization.
+- Do not treat the trellis-kerminal CLI repo source code as the default target for local customization.
 - Do not modify the global npm install directory or `node_modules/trellis-kerminal` to implement project needs; the package ships as one unit.
 - Do not overwrite user-modified local files with default templates; check `.trellis/.template-hashes.json` first and prefer `.new` sidecar files over destructive overwrites.
 - Do not put team-private project rules into any public bundled skill (`trellis-meta`, `trellis-spec-bootstrap`, `trellis-session-insight`); put project rules in `.trellis/spec/`, a project-local skill, the current task, or the workspace journal — `trellis update` will overwrite anything inside a bundled skill directory.

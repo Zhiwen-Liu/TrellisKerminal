@@ -104,7 +104,6 @@ dist/
 │   ├── trellis/       # .trellis/ scripts and config
 │   ├── common/        # Shared command + skill templates
 │   ├── kerminal/      # Kerminal entry skills, agent prompts, operator guide
-│   ├── shared-hooks/  # Platform-independent hook scripts
 │   └── markdown/
 │       └── spec/      # Generic spec templates
 └── migrations/
@@ -132,35 +131,51 @@ Shared logic belongs in `packages/cli/src/core/` when it is useful outside termi
 
 ### Configurator Pattern
 
-A configurator exports **one** function: `collect<Platform>Templates()`,
-returning `Map<relPath, content>` — the single description of what that
-platform installs. `configure` is derived from it in the registry.
+A configurator's core is `collect<Platform>Templates()`, returning
+`Map<relPath, content>` — the single description of what that platform
+installs. `configure` is usually derived from the map in the registry;
+Kerminal spells its own `configureKerminal` because it adds one behavior a
+map cannot carry (the non-git-directory `git init` guard).
 
 ```typescript
-// configurators/cursor.ts
-export function collectCursorTemplates(): Map<string, string> {
-  const files = collectBothTemplates(
-    AI_TOOLS.cursor.templateContext,
-    (n) => `.cursor/commands/trellis-${n}.md`,
-    ".cursor/skills",
-  );
-  for (const agent of getAllAgents()) {
-    files.set(`.cursor/agents/${agent.name}.md`, agent.content);
+// configurators/kerminal.ts
+export function collectKerminalTemplates(): Map<string, string> {
+  const ctx = AI_TOOLS.kerminal.templateContext;
+  const files = new Map<string, string>();
+
+  // 1. Workflow + bundled skills → shared `.agents/skills/` (neutral
+  //    rendering, identical across every consumer of the shared root).
+  for (const [filePath, content] of collectSkillTemplates(
+    ".agents/skills",
+    resolveSkillsNeutral(ctx),
+    resolveBundledSkills(ctx),
+  )) {
+    files.set(filePath, content);
   }
-  for (const [k, v] of collectSharedHooks(".cursor/hooks", "cursor")) {
-    files.set(k, v);
+
+  // 2. Entry skills + Trellis agent prompts → `.kerminal/skills/`.
+  for (const [filePath, content] of collectSkillTemplates(".kerminal/skills", [
+    ...resolveKerminalCommandSkills(),
+    ...resolveKerminalAgentSkills(),
+  ])) {
+    files.set(filePath, content);
   }
-  files.set(".cursor/hooks.json", resolvePlaceholders(getHooksConfig()));
+
+  // 3. Operator guide → `.kerminal/KERMINAL.md`.
+  files.set(".kerminal/KERMINAL.md", getKerminalGuide());
+
   return files;
 }
 
 // configurators/index.ts
-cursor: fromTemplates(collectCursorTemplates),
+kerminal: {
+  configure: configureKerminal,
+  collectTemplates: collectKerminalTemplates,
+},
 ```
 
-Full contract — map key/value rules, the three platforms that also need a
-`configure`, and the parity oracle — in `configurator-shared.md` →
-"Template maps".
+Full contract — map key/value rules, spelled-`configure` residuals, and the
+parity oracle — in `configurator-shared.md` → "Template maps".
 
 ### Template Extraction
 
@@ -395,7 +410,7 @@ Packages that received a remote template download (tracked via `remoteSpecPackag
 - Describe a platform's file set exactly once, in its `collect<Platform>Templates()`
 - Keep generic templates in `src/templates/markdown/`
 - Use `.md.txt` or `.yaml.txt` for template files
-- Update dogfooding sources (`.cursor/`, `.claude/`, `.trellis/scripts/`) when making changes
+- Update dogfooding sources (`.kerminal/`, `.agents/skills/`) when making changes
 - Always use `python3` explicitly when documenting script invocation (Windows compatibility)
 
 ### DON'T

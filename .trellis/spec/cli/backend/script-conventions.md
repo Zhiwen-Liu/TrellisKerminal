@@ -556,8 +556,10 @@ for session/window scoped task state:
 
 The env branch is the exception, not a peer alternative. **No researched
 platform exports a session id into a shell child** (2026-08-05 audit of all 21;
-`inject-shell-session-context.py:3-8`, `active_task.py:59-64`), so for most
-platforms the ticket — checked *last* — is the path that actually fires.
+`inject-shell-session-context.py:3-8` — that script was deleted with
+`templates/shared-hooks/` in the 0.7.0 Kerminal-only prune, git history ≤
+0.6.20 — `active_task.py:59-64`), so for most platforms the ticket — checked
+*last* — is the path that actually fires.
 
 | Function | Purpose |
 |----------|---------|
@@ -575,7 +577,16 @@ platforms degrades gracefully (status still flips, warning printed) — and on a
 **Kerminal-class pull-based install** it never degrades at all: when no
 hook-platform config dir exists (`.claude/`, `.codex/`, …) the resolver
 substitutes the stable `kerminal_default` session key, so create / start /
-current / finish all land on one pointer file. For Claude Code, SessionStart receives
+current / finish all land on one pointer file.
+
+> **Historical note (upstream multi-platform era).** The per-platform bridges
+> below — Claude Code's `CLAUDE_ENV_FILE`, the OpenCode plugin command
+> prefix, the Pi extension — describe platforms that no longer ship in the
+> Kerminal-only distribution; there, session identity always resolves through
+> the `kerminal_default` fallback described above. The patterns are retained
+> as historical reference.
+
+For Claude Code, SessionStart receives
 `CLAUDE_ENV_FILE`; Trellis must append `export TRELLIS_CONTEXT_ID=<context-key>`
 there so later Bash tools inherit the same session identity. For OpenCode,
 `tool.execute.before` must prefix Bash commands with
@@ -873,6 +884,8 @@ before a shell command writes a ticket, and `task.py` reads it back.
 
 ```python
 # templates/shared-hooks/inject-shell-session-context.py — the writer
+# (script deleted together with templates/shared-hooks/ in the 0.7.0
+#  Kerminal-only prune; git history ≤ 0.6.20)
 def _pending_shell_command(hook_input: dict) -> tuple[str, dict | None]
 def _host_platform_name() -> str | None
 def _extract_task_subcommands(command: str) -> list[dict[str, str]]
@@ -885,8 +898,10 @@ Ticket path: `.trellis/.runtime/shell-tickets/<epoch-ms>-<sha256-16>.json`.
 
 ##### 3. Contracts
 
-**Registration.** `inject-shell-session-context.py` is registered on whichever
-pre-shell event the host publishes: Cursor's `beforeShellExecution`,
+**Registration.** `inject-shell-session-context.py` — the script itself was
+deleted with `templates/shared-hooks/` in the 0.7.0 Kerminal-only prune; this
+section is retained as historical reference — was registered on whichever
+pre-shell event the host published: Cursor's `beforeShellExecution`,
 Claude-shaped `PreToolUse`, Gemini's `BeforeTool`. `_pending_shell_command` is
 the only place that knows about payload variation — it reads `command` at the
 top level (shell-execution shape) or `tool_input.command` / `toolInput.command`

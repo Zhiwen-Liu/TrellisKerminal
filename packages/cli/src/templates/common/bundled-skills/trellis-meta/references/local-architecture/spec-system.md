@@ -30,8 +30,8 @@ A common monorepo structure:
 │   └── unit-test/
 │       ├── index.md
 │       └── ...
-├── docs-site/
-│   └── docs/
+├── docs/
+│   └── writing/
 │       ├── index.md
 │       └── ...
 └── guides/
@@ -49,9 +49,8 @@ A common monorepo structure:
 packages:
   cli:
     path: packages/cli
-  docs-site:
-    path: docs-site
-    type: submodule
+  docs:
+    path: docs
 default_package: cli
 ```
 

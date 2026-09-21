@@ -127,4 +127,4 @@ When modifying the task system, the AI should prefer script commands to maintain
 | Change context rules | Planning artifact guidance in `.trellis/workflow.md` and related platform agent/hook instructions. |
 | Change archive policy | `.trellis/scripts/common/task_store.py` / `task_utils.py`. |
 
-These are local files in the user project. Do not default to editing Trellis CLI source code unless the user wants to contribute upstream.
+These are local files in the user project. Do not default to editing the trellis-kerminal CLI source unless the user wants to contribute to the trellis-kerminal CLI repo.

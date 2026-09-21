@@ -146,29 +146,29 @@ of that replay model.
 
 ## Gotcha: Python if/elif/else Exhaustive Check
 
-**Problem**: Python's if/elif/else chains have no compile-time exhaustive check. When you add a new value to a `Literal` type (e.g., `Platform`), existing if/elif/else chains silently fall through to `else` with wrong defaults.
+**Problem**: Python's if/elif/else chains have no compile-time exhaustive check. When you add a new value to a `Literal` type (e.g., `ProjectType`), existing if/elif/else chains silently fall through to `else` with wrong defaults.
 
-**Symptom**: New platform works partially — some methods return Claude defaults instead of platform-specific values. No error is raised.
+**Symptom**: The new value works partially — some methods keep returning defaults for a different value instead of handling the new one. No error is raised.
 
-**Example** (`cli_adapter.py`):
+**Example**:
 ```python
-# BAD: "gemini" falls through to else, returns "claude"
+# BAD: "fullstack" falls through to else, returns "frontend"
 @property
-def cli_name(self) -> str:
-    if self.platform == "opencode":
-        return "opencode"
+def default_layer(self) -> str:
+    if self.project_type == "backend":
+        return "backend"
     else:
-        return "claude"  # gemini silently gets "claude"!
+        return "frontend"  # fullstack silently gets "frontend"!
 
-# GOOD: explicit branch for every platform
+# GOOD: explicit branch for every project type
 @property
-def cli_name(self) -> str:
-    if self.platform == "opencode":
-        return "opencode"
-    elif self.platform == "gemini":
-        return "gemini"
+def default_layer(self) -> str:
+    if self.project_type == "backend":
+        return "backend"
+    elif self.project_type == "fullstack":
+        return "fullstack"
     else:
-        return "claude"
+        return "frontend"
 ```
 
 **Prevention**: When adding a new value to a Python `Literal` type, search for ALL if/elif/else chains that switch on that type and add explicit branches. Don't rely on `else` being correct for new values.
@@ -186,7 +186,7 @@ def cli_name(self) -> str:
 - **If asymmetry is unavoidable**: Add a regression test that compares outputs from both mechanisms
 - When migrating directory structures, search for ALL code paths that reference the old structure
 
-**Real example**: `trellis update` had a manual `files.set()` list for 11 scripts that `getAllScripts()` already tracked. Fix: replaced the manual list with a `for..of getAllScripts()` loop. See `update.ts` refactor in v0.4.0-beta.3.
+**Real example**: `trellis update` had a manual `files.set()` list for 11 scripts that `getAllScripts()` already tracked. Fix: replaced the manual list with a `for..of getAllScripts()` loop. See the earlier `update.ts` refactor.
 
 ---
 
@@ -203,7 +203,7 @@ That's it. `commands/update.ts` uses `getAllScripts()` directly — no manual sy
 
 **Why this matters**: Without registration in `getAllScripts()`, `trellis update` won't sync the file to user projects. Bug fixes and features won't propagate.
 
-**History**: Before v0.4.0-beta.3, `update.ts` had its own hand-maintained file list that frequently fell out of sync with `getAllScripts()`. This caused 11 Python files to be silently skipped during `trellis update`. The fix was to eliminate the duplicate list and use `getAllScripts()` as the single source of truth.
+**History**: Before an earlier refactor, `update.ts` had its own hand-maintained file list that frequently fell out of sync with `getAllScripts()`. This caused 11 Python files to be silently skipped during `trellis update`. The fix was to eliminate the duplicate list and use `getAllScripts()` as the single source of truth.
 
 ### Quick Checklist for New Scripts
 

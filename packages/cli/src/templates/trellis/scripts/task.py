@@ -265,7 +265,7 @@ def cmd_start(args: argparse.Namespace) -> int:
             _record_start_state(task_json_path, repo_root)
 
         print()
-        print(colored("The hook will now inject context from this task's jsonl files.", Colors.BLUE))
+        print(colored("Sub-agents dispatched next will read this task's jsonl context.", Colors.BLUE))
 
         run_task_hooks("after_start", task_json_path, repo_root)
         return 0

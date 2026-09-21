@@ -5,10 +5,10 @@
 Therefore, when an AI uses this skill, the default customization target is local files inside the user project:
 
 - `.trellis/`: workflow, tasks, specs, memory, scripts, and runtime state.
-- Platform directories: `.claude/`, `.codex/`, `.cursor/`, `.opencode/`, `.kiro/`, `.gemini/`, `.qoder/`, `.codebuddy/`, `.github/`, `.factory/`, `.pi/`, `.kilocode/`, `.agent/`, `.devin/`, `.reasonix/`, `.zcode/`, `.kerminal/`, and similar directories.
+- Platform files: `AGENTS.md` at the project root plus `.kerminal/` (entry skills under `.kerminal/skills/` and the `.kerminal/KERMINAL.md` operator guide).
 - Shared skill layer: `.agents/skills/`.
 
-Do not default to guiding the user to fork the Trellis CLI repository. Treat upstream source code as the operating target only when the user explicitly says they want to change Trellis upstream source, publish an npm package, or contribute a PR.
+Do not default to guiding the user to modify the trellis-kerminal CLI repository. Treat the trellis-kerminal CLI source as the operating target only when the user explicitly says they want to change the CLI source, publish an npm package, or contribute a PR.
 
 ## Local System Model
 

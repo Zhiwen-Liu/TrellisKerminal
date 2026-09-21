@@ -95,10 +95,16 @@ Rules:
 ## Updating and uninstalling
 
 - `npm install -g trellis-kerminal@latest` — upgrade the global CLI.
-- `trellis upgrade` — the same thing via the CLI (channel-aware tag defaults,
-  `--tag`, `--dry-run`).
+- `trellis upgrade` — the same thing via the CLI (follows the npm dist-tag
+  matching your current version; `--tag`, `--dry-run`).
 - `trellis update` — refresh the Trellis-managed files inside a project
   (skills, agent prompts, `.trellis/` scripts and workflow.md, `AGENTS.md`
   managed block). Your spec content and tasks are never overwritten.
 - `trellis uninstall` — permanently remove Trellis-managed surfaces from a
   project (asks before deleting anything it did not write itself).
+- `trellis mem` — read local AI session stores (Kerminal's own
+  `~/.kerminal/sessions/`, plus Claude Code / Codex / Devin / Grok / OpenCode /
+  Pi / ZCode when present). Offline, read-only; `trellis mem help` for the
+  subcommand surface.
+- `trellis workflow` — list (`--list`) or reset the project's
+  `.trellis/workflow.md` to the bundled native template.

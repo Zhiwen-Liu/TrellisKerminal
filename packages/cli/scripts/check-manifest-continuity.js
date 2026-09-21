@@ -77,7 +77,7 @@ function fetchNpmVersions() {
     return Array.isArray(parsed) ? parsed : [parsed];
   } catch (err) {
     // First publish ever? Package doesn't exist on npm yet — nothing to sync.
-    // The TrellisKerminal fork (trellis-kerminal) starts fresh at 0.7.0 with
+    // trellis-kerminal starts fresh at 0.7.0 with
     // zero published history, so until the first publish lands this gate is
     // vacuous: treat "not found on npm" as a clean skip, not a failure.
     const stderr = err.stderr?.toString() ?? "";
@@ -105,7 +105,7 @@ function main() {
   if (npmVersions.length === 0) {
     console.log(
       `${GREEN}✓${RESET} ${PACKAGE_NAME} has no published versions on npm yet ` +
-      `(fork starts fresh at 0.7.0) — manifest continuity check skipped.`,
+      `(package starts fresh at 0.7.0) — manifest continuity check skipped.`,
     );
     return;
   }

@@ -2,7 +2,7 @@
 
 感谢你对 TrellisKerminal 的关注！本文档提供参与项目贡献的指南。
 
-TrellisKerminal 是 [mindfold-ai/Trellis](https://github.com/mindfold-ai/Trellis) 的 Kerminal 专用发行版：只发布单个 `trellis-kerminal` npm 包，仅支持 Kerminal 平台。所有内容都在本仓库内——没有独立的文档仓库，也没有 marketplace 子模块。
+TrellisKerminal 是面向 [Kerminal](https://kerminal.cn/) 的工程化框架，以单个 `trellis-kerminal` npm 包发布。所有内容都在本仓库内——文档以纯 Markdown 维护在 `docs/` 目录。
 
 ## 贡献方式
 
@@ -25,7 +25,7 @@ TrellisKerminal 是 [mindfold-ai/Trellis](https://github.com/mindfold-ai/Trellis
 - 使用场景 / 解决的问题
 - 实现思路（可选）
 
-注意：平台支持面有意限定为 Kerminal。仅对其他 AI 宿主有意义的功能通常应该提到[上游](https://github.com/mindfold-ai/Trellis)。
+注意：平台支持面有意限定为 Kerminal。面向其他 AI 宿主的功能不在本项目范围内。
 
 ### 改进文档
 

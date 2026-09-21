@@ -12,7 +12,7 @@
 </p>
 
 > [!NOTE]
-> **TrellisKerminal** is the Kerminal-only distribution of [mindfold-ai/Trellis](https://github.com/mindfold-ai/Trellis) — it builds on upstream's ideas (specs, tasks, and memory persisted in your repo) but ships a single `trellis-kerminal` npm package with Kerminal as the only supported platform. Docs are plain Markdown in [`docs/`](./docs/).
+> **TrellisKerminal** is an engineering framework for [Kerminal](https://kerminal.cn/): it persists specs, tasks, and memory into your repo so every coding session works to your team's standards. Ships as a single `trellis-kerminal` npm package; docs are plain Markdown in [`docs/`](./docs/).
 
 <p align="center">
 <a href="./README_CN.md">简体中文</a> •
@@ -25,15 +25,8 @@
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-16a34a.svg?style=flat-square" alt="license" /></a>
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/stargazers"><img src="https://img.shields.io/github/stars/Zhiwen-Liu/TrellisKerminal?style=flat-square&color=eab308" alt="stars" /></a>
 <a href="./docs/"><img src="https://img.shields.io/badge/docs-markdown-0f766e?style=flat-square" alt="docs" /></a>
-<a href="https://discord.com/invite/tWcCZ3aRHc"><img src="https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord" /></a>
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/issues"><img src="https://img.shields.io/github/issues/Zhiwen-Liu/TrellisKerminal?style=flat-square&color=e67e22" alt="open issues" /></a>
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal/pulls"><img src="https://img.shields.io/github/issues-pr/Zhiwen-Liu/TrellisKerminal?style=flat-square&color=9b59b6" alt="open PRs" /></a>
-<a href="https://deepwiki.com/mindfold-ai/Trellis"><img src="https://img.shields.io/badge/Ask-DeepWiki-blue?style=flat-square" alt="Ask DeepWiki" /></a>
-<a href="https://chatgpt.com/?q=Explain+the+project+mindfold-ai/Trellis+on+GitHub"><img src="https://img.shields.io/badge/Ask-ChatGPT-74aa9c?style=flat-square&logo=openai&logoColor=white" alt="Ask ChatGPT" /></a>
-</p>
-
-<p align="center">
-<img src="assets/trellis-demo.gif" alt="Trellis workflow demo" width="100%">
 </p>
 
 ## Why Trellis?
@@ -44,7 +37,7 @@
 | **Task-centered workflow** | Keep PRDs, implementation context, review context, and task status in `.trellis/tasks/` so AI work stays structured. |
 | **Project memory** | Journals in `.trellis/workspace/` preserve what happened last time, so each new session starts with real context. |
 | **Team-shared standards** | Specs live in the repo, so one person's hard-won workflow or rule can benefit the whole team. |
-| **Kerminal-first** | This fork evolves the Kerminal integration only — upstream Trellis supported 23 AI coding platforms up to 0.6.x (see upstream for those). |
+| **Kerminal-native** | Built for Kerminal's pull-based skill model: entry skills, agent prompts, and generic sub-agent dispatch, no hooks required. |
 
 ## Prerequisites:
 
@@ -58,7 +51,7 @@
 npm install -g trellis-kerminal@latest
 
 # 2. Initialize in your repo with Kerminal
-trellis init --kerminal -u your-name
+trellis init -u your-name
 
 # 3. Open the project in Kerminal and describe your task
 ```
@@ -112,7 +105,7 @@ Those files are useful entry points, but they tend to become monolithic. Trellis
 <details>
 <summary><strong>Is Trellis only for Claude Code?</strong></summary>
 
-TrellisKerminal targets [Kerminal](https://kerminal.cn/) as its only supported platform. Upstream Trellis supported 23 platforms; this distribution ships a single `trellis-kerminal` npm package.
+Yes, by design. TrellisKerminal targets [Kerminal](https://kerminal.cn/) as its only platform — the entire workflow, skill set, and update pipeline are tuned for it.
 
 </details>
 
@@ -137,38 +130,14 @@ Yes. Personal workspace journals stay separate per developer, while shared specs
 
 </details>
 
-<details>
-<summary><strong>Can I temporarily compare a project with and without Trellis?</strong></summary>
-
-Yes. `trellis ablate` temporarily removes all supported project-owned Trellis
-surfaces after creating a verified recovery transaction outside the project.
-Start a fresh agent session for the comparison, then run `trellis restore` to
-recover the exact prior state. Use `--dry-run` to preview either operation.
-The private recovery transaction includes exact `.trellis` task, spec, and
-workspace bytes, which may contain user-authored sensitive text, and is kept
-until restore verifies successfully.
-
-This is different from `trellis uninstall` (permanent removal) and
-`TRELLIS_HOOKS=0` (hooks only). Ablation does not launch agents, manage
-worktrees, hide Git changes, or remove the global CLI, channel logs, or host
-transcripts. If a managed path changes while ablated, restore refuses all
-writes until the conflict is resolved.
-
-</details>
-
-## Star History
-
-[![Star History Chart](https://star-history.dera.page/svg?repos=mindfold-ai/Trellis&type=Date)](https://star-history.dera.page/#mindfold-ai/Trellis&Date)
-
 ## Community & Resources
 
 - [Docs (Markdown)](./docs/)
 - [GitHub Issues](https://github.com/Zhiwen-Liu/TrellisKerminal/issues)
-- [Discord](https://discord.com/invite/tWcCZ3aRHc) (upstream community)
+- [Discussions](https://github.com/Zhiwen-Liu/TrellisKerminal/discussions)
 
 <p align="center">
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal">TrellisKerminal</a> •
-<a href="https://github.com/mindfold-ai/Trellis">Upstream Repository</a> •
 <a href="./LICENSE">AGPL-3.0 License</a> •
-Built by <a href="https://github.com/mindfold-ai">Mindfold</a>, fork maintained by <a href="https://github.com/Zhiwen-Liu">Zhiwen-Liu</a>
+Built by <a href="https://github.com/Zhiwen-Liu">Zhiwen-Liu</a>
 </p>

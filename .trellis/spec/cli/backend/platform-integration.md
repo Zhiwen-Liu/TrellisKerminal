@@ -1,6 +1,18 @@
 # Platform Integration Guide
 
-How to add support for a new AI CLI platform. The 21 currently registered are Claude Code, Cursor, OpenCode, Codex, Kilo, Kiro, Gemini CLI, Antigravity, Devin, Qoder, CodeBuddy, Copilot, Factory Droid, Pi, Reasonix, ZCode, Trae, OMP, Grok, Kimi, and Snow — `PLATFORM_IDS` in `configurators/index.ts` is the list that counts.
+> **⚠ Historical reference — upstream multi-platform era.** This document
+> describes the integration patterns of the upstream multi-platform Trellis
+> (hook-driven platforms, agent-prelude platforms, the 20+ platform registry).
+> The Kerminal-only distribution keeps exactly **one** platform: Kerminal.
+> Files referenced below — `src/templates/{platform}/`,
+> `src/configurators/{platform}.ts`, `src/templates/shared-hooks/`, … — existed
+> in historical versions (git history ≤ 0.6.20); the current codebase keeps
+> only `src/configurators/kerminal.ts` (plus `index.ts` / `shared.ts` /
+> `workflow.ts`) and the `trellis/ kerminal/ common/ markdown/` template dirs.
+> The body is retained as an architecture reference: read it for the registry
+> pattern and its invariants, not as a map of present-day files.
+
+How to add support for a new AI CLI platform. The 21 registered at the time of writing (upstream multi-platform era) were Claude Code, Cursor, OpenCode, Codex, Kilo, Kiro, Gemini CLI, Antigravity, Devin, Qoder, CodeBuddy, Copilot, Factory Droid, Pi, Reasonix, ZCode, Trae, OMP, Grok, Kimi, and Snow — `PLATFORM_IDS` in `configurators/index.ts` is the list that counts (in the Kerminal-only distribution it contains only `kerminal`).
 
 ---
 
@@ -2211,7 +2223,7 @@ Note this is *only* about `{{…}}` placeholders. The separate `python3` → `py
 
 **Symptom**: On a freshly initialized project that used an opt-in feature (e.g., `--with-statusline`), the very first `trellis update` reports `.claude/settings.json` as "Template updated (will auto-update)", rewrites it, and leaves a spurious backup — with zero actual changes.
 
-**Cause**: Init injected the key at a hand-picked position in the template (e.g., `statusLine` "between `env` and `hooks`"), but update's preservation step (`preserveExistingClaudeStatusLine()` in `update.ts`) re-adds preserved keys via plain `parse → assign → stringify`, which appends at the end. The two serializations differ byte-wise, so the content comparison flags a false change.
+**Cause**: Init injected the key at a hand-picked position in the template (e.g., `statusLine` "between `env` and `hooks`"), but update's preservation step (a since-removed Claude `statusLine`-preservation helper in `update.ts`; see the historical banner at the top of this doc) re-adds preserved keys via plain `parse → assign → stringify`, which appends at the end. The two serializations differ byte-wise, so the content comparison flags a false change.
 
 **Fix**: The init-time injection must mirror the update-time preservation routine byte-for-byte (same parse → assign → stringify, same indent). Pinned by a regression test asserting `settings.json` byte-identity across `update --force` on a fresh opted-in project.
 

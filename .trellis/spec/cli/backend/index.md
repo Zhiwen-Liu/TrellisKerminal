@@ -23,7 +23,7 @@ This directory contains guidelines for backend development. Fill in each file wi
 | [Filesystem Safety](./filesystem-safety.md) | Atomic writes (temp+rename / `os.replace`), path/name chokepoint validation, destructive-op ownership & backup gates, dogfood twin sync | Done |
 | [Release Process](./release-process.md) | CI-only publishing, package versioning, release tracks, manifest continuity | Done |
 | [Core Module Boundary](./trellis-core-sdk.md) | `src/core/` ↔ CLI boundary, public entry points, build and versioning contracts | Done |
-| [Platform Integration](./platform-integration.md) | How to add support for new AI CLI platforms | Done |
+| [Platform Integration](./platform-integration.md) | Upstream multi-platform integration patterns (historical reference; Kerminal is the only platform now) | Reference |
 | [Workflow-State Contract](./workflow-state-contract.md) | Per-turn breadcrumb subsystem: marker syntax, status writers, lifecycle events, reachability | Done |
 | [Configurator Shared Helpers](./configurator-shared.md) | `configurators/shared.ts` public surface: placeholder substitution, write helpers, pull-based prelude, cross-configurator invariants | Done |
 | [`tl mem` Command](./commands-mem.md) | Cross-platform AI session memory: subcommands, schemas, indexing, cleaning pipeline, search relevance | Done |
@@ -40,8 +40,7 @@ Before writing backend code, read the relevant guidelines based on your task:
 
 - Error handling → [error-handling.md](./error-handling.md)
 - Logging → [logging-guidelines.md](./logging-guidelines.md)
-- Adding a platform → [platform-integration.md](./platform-integration.md)
-- Modifying `init.ts` flow (new triggers, dispatch branches, bootstrap/joiner) → [platform-integration.md "Bootstrap & Joiner Task Auto-Generation"](./platform-integration.md) — two-point wiring + `.developer` signal
+- Modifying `init.ts` flow (new triggers, dispatch branches, bootstrap/joiner) → [platform-integration.md "Bootstrap & Joiner Task Auto-Generation"](./platform-integration.md) — two-point wiring + `.developer` signal (historical reference; adapt to the Kerminal-only registry)
 - Script work → [script-conventions.md](./script-conventions.md)
 - Migration system → [migrations.md](./migrations.md)
 - Writing/deleting/moving/overwriting files in a user repo (any `writeFileSync`, `rmSync`, `renameSync`, `shutil.move`, or user/agent-supplied path segment) → [filesystem-safety.md](./filesystem-safety.md)

@@ -68,9 +68,8 @@ Note that `force` / `skipAll` / `createNew` are mutually exclusive in spirit but
 | `.trellis/workflow.md` | `templates/trellis/index.ts:workflowMdTemplate` (whole-file hash-gated, see below) |
 | Root `AGENTS.md` | `commands/update.ts:buildAgentsMdTemplate` (managed-block merge) |
 | Per-platform files | `configurators/index.ts:collectPlatformTemplates` for each detected platform via `configurators/index.ts:getConfiguredPlatforms` |
-| `.claude/settings.json` `statusLine` | preserved through `commands/update.ts:preserveExistingClaudeStatusLine` |
 
-Platforms are auto-discovered by directory existence in `cwd`. There is one exception: if `commands/update.ts:needsCodexUpgrade` returns true (legacy Trellis tracked `.agents/skills/` but no `.codex/` exists yet), `commands/update.ts:update` passes `extraPlatforms: new Set(["codex"])` to force Codex template collection so the upgrade can create `.codex/`.
+Platforms are auto-discovered by directory existence in `cwd` — in the Kerminal-only distribution this resolves to Kerminal at most (`getConfiguredPlatforms` reads the registry, whose sole entry is `kerminal`). Historical note: the upstream multi-platform build special-cased two more behaviors here — a Claude `settings.json` `statusLine` preservation pass and a `needsCodexUpgrade` legacy-Codex bootstrap (both helpers were removed together with their platforms in the 0.7.0 Kerminal-only prune; see git history ≤ 0.6.20).
 
 After collection, `collectTemplateFiles` runs two final passes:
 
@@ -345,7 +344,9 @@ Migrations are forward-only. A user who downgrades while staying on the same maj
 
 ### Codex two-layer upgrade
 
-Old Trellis used `.agents/skills/` as the Codex configDir; current Trellis uses `.codex/` plus a shared `.agents/skills/` layer. `commands/update.ts:needsCodexUpgrade` detects the legacy state by looking for command-as-skill marker entries (`trellis-continue/SKILL.md`, `trellis-finish-work/SKILL.md`) in the hash file, then excludes any configured non-Codex platform whose current template collector declares those same marker paths. Current non-Codex platforms with a private command surface, such as ZCode, must not declare those marker paths under `.agents/skills`; this keeps combined installs from producing hash churn and keeps the Codex legacy detector unambiguous. When legacy Codex is detected, `update()` injects `codex` into `extraPlatforms` so `collectTemplateFiles` produces the missing `.codex/` files.
+> Historical (upstream multi-platform era — the `needsCodexUpgrade` helper and the Codex platform it served were removed in the 0.7.0 Kerminal-only prune). Kept as the record of why `.agents/skills/` marker paths were platform-scoped:
+
+Old Trellis used `.agents/skills/` as the Codex configDir; the upstream build used `.codex/` plus a shared `.agents/skills/` layer. `needsCodexUpgrade` (in `commands/update.ts` at the time) detected the legacy state by looking for command-as-skill marker entries (`trellis-continue/SKILL.md`, `trellis-finish-work/SKILL.md`) in the hash file, then excluded any configured non-Codex platform whose current template collector declared those same marker paths. Non-Codex platforms with a private command surface, such as ZCode, had to not declare those marker paths under `.agents/skills`; this kept combined installs from producing hash churn and kept the Codex legacy detector unambiguous. When legacy Codex was detected, `update()` injected `codex` into `extraPlatforms` so `collectTemplateFiles` produced the missing `.codex/` files.
 
 General platform detection also uses template hashes, but with a stricter
 ownership intersection: a platform counts only when the manifest contains a

@@ -10,16 +10,16 @@ How the uninstall command removes every Trellis-written file from a project, scr
 
 `trellis uninstall` is the inverse of `trellis init` / `trellis update`: it removes everything Trellis wrote and leaves everything Trellis did not.
 
-- **Manifest is authoritative.** The single source of truth for "what trellis wrote" is `.trellis/.template-hashes.json`. Files outside that manifest are never touched, regardless of where they live (e.g. user-added scripts under `.claude/hooks/`, custom commands under `.cursor/commands/`).
+- **Manifest is authoritative.** The single source of truth for "what trellis wrote" is `.trellis/.template-hashes.json`. Files outside that manifest are never touched, regardless of where they live (e.g. user-added skills under `.kerminal/skills/`, custom skills under `.agents/skills/`).
 - **No user-modification gate.** Whether the user has edited a manifest-listed file or not, it is removed. `update` semantics (warn / preserve modified files) do not apply here — the user's intent is to remove Trellis entirely.
 - **Two file classes.** Manifest entries fall into:
   1. *Opaque content files* (most `.py`, `.md`, `.toml`, `.json` agents, etc.) — unlinked outright.
-  2. *Structured config files* (`settings.json`, `hooks.json`, `package.json`, `config.toml`, and mixed-ownership markdown like `AGENTS.md`) — passed through a scrubber that removes only the trellis-owned fields/block and writes the trimmed result back. If nothing meaningful remains, the scrubber returns `fullyEmpty: true` and the file is deleted instead of rewritten.
+  2. *Structured config files* — mixed-ownership markdown like `AGENTS.md`, the one structured file the Kerminal-only distribution writes — passed through a scrubber that removes only the trellis-owned block and writes the trimmed result back. If nothing meaningful remains, the scrubber returns `fullyEmpty: true` and the file is deleted instead of rewritten. (The upstream multi-platform build also scrubbed `settings.json`, `hooks.json`, `package.json`, `config.toml` — see the 0.7.0 note below.)
 - **`.trellis/` is removed unconditionally once execution proceeds.** Tasks, runtime state, workspace journal, config — all of it; there is no `--keep-tasks` flag. A pre-execution guard warns about (and, for scripted `--yes` runs, can fail closed on) uncommitted specs/tasks/workspace files before that deletion happens — see *Dirty-Data Guard* under *`.trellis/` Handling* below, and [Filesystem Safety § Destructive-op ownership / backup gate](./filesystem-safety.md).
 - **Idempotent.** Re-running on a project that has no `.trellis/` is a friendly no-op. Re-running after a partial failure picks up whatever is still on disk and converges.
 - **Best-effort cleanup.** Permission errors on individual `unlink`/`rmdir` calls are swallowed; the command never aborts halfway. The summary at the end reports counts but does not enumerate per-file failures.
 
-For the *content* of each scrubber (which fields are stripped from `.claude/settings.json`, what counts as a trellis comment in `.codex/config.toml`, etc.), see `uninstall-scrubbers.md` for per-file scrubbing rules.
+For the *content* of the scrubber (which block is stripped from `AGENTS.md`, the marker contract, and the 0.7.0 single-platform note about the removed per-platform scrubbers), see `uninstall-scrubbers.md`.
 
 ---
 
@@ -83,26 +83,15 @@ established best-effort behavior unchanged.
 
 A `Map<posixPath, StructuredFileSpec>` built once per command invocation. Each entry pairs a manifest-listed config file with the scrubber that knows how to surgically edit it. Current entries:
 
-| Manifest path | Scrubber | Hooks-JSON mode |
-|---|---|---|
-| `.claude/settings.json` | `scrubHooksJson` | `nested` |
-| `.gemini/settings.json` | `scrubHooksJson` | `nested` |
-| `.factory/settings.json` | `scrubHooksJson` | `nested` |
-| `.codebuddy/settings.json` | `scrubHooksJson` | `nested` |
-| `.qoder/settings.json` | `scrubHooksJson` | `nested` |
-| `.codex/hooks.json` | `scrubHooksJson` | `nested` |
-| `.cursor/hooks.json` | `scrubHooksJson` | `flat` |
-| `.github/copilot/hooks.json` | `scrubHooksJson` | `flat` |
-| `.opencode/package.json` | `scrubOpencodePackageJson` | n/a |
-| `.pi/settings.json` | `scrubPiSettings` | n/a |
-| `.codex/config.toml` | `scrubCodexConfigToml` | n/a |
-| `AGENTS.md` | `scrubManagedMarkdownBlock` | n/a |
+| Manifest path | Scrubber |
+|---|---|
+| `AGENTS.md` | `scrubManagedMarkdownBlock` (`TRELLIS_BLOCK_START` / `TRELLIS_BLOCK_END` markers) |
 
-`AGENTS.md` is not a hooks-JSON file — it's a mixed-ownership markdown file. Trellis owns only the `<!-- TRELLIS:START/END -->` block (markers exported from `update.ts`); the user owns everything outside it. It shares `scrubManagedMarkdownBlock` with the Copilot-instructions scrubber: strip the block, keep the rest, and only fall through to deletion (`fullyEmpty`) when nothing user-authored remains. Before this spec was added, `AGENTS.md` had no dispatch-table row and was `unlinkSync`'d whole by the plain-deletion path, destroying any pre-existing user content outside the block.
+`AGENTS.md` is a mixed-ownership markdown file: Trellis owns only the `<!-- TRELLIS:START/END -->` block (markers exported from `utils/managed-paths.ts`); the user owns everything outside it. `scrubManagedMarkdownBlock` strips the block, keeps the rest, and only falls through to deletion (`fullyEmpty`) when nothing user-authored remains. Before this spec was added, `AGENTS.md` had no dispatch-table row and was `unlinkSync`'d whole by the plain-deletion path, destroying any pre-existing user content outside the block.
 
-Adding a new platform that ships a structured config file means adding one row to this table — the planner picks it up automatically. **Per-file scrub semantics live in `uninstall-scrubbers.md`; do not duplicate them here.**
+Historical note: the upstream multi-platform build registered ~12 rows here — per-platform scrubbers for `.claude/settings.json` / `.codex/hooks.json` (hooks-JSON, `nested`/`flat` modes), `.opencode/package.json`, `.pi/settings.json`, `.codex/config.toml`, and a Copilot-instructions twin of the markdown scrubber. All were removed with their platforms in the 0.7.0 Kerminal-only registry collapse — see the 0.7.0 single-platform note in [uninstall-scrubbers.md](./uninstall-scrubbers.md) (git history ≤ 0.6.20 has the originals).
 
-The `StructuredFileSpec.scrub` callback receives `(content, deletedPaths)`. `deletedPaths` is the full set of manifest-listed POSIX paths for *this uninstall*, used by hooks-JSON scrubbers to identify trellis-managed `command` strings without false-matching on user-added hooks that merely mention the path in an `echo` or comment.
+The `StructuredFileSpec.scrub` callback receives `(content, deletedPaths)`. `deletedPaths` is the full set of manifest-listed POSIX paths for *this uninstall*; the current `AGENTS.md` scrubber ignores it (the historical hooks-JSON scrubbers used it to identify trellis-managed `command` strings without false-matching user-added hooks). Adding a platform that ships a structured config file means adding one row to this table — the planner picks it up automatically. **Per-file scrub semantics live in `uninstall-scrubbers.md`; do not duplicate them here.**
 
 ### Plan rendering — `commands/uninstall.ts:renderPlan`
 
@@ -152,11 +141,11 @@ While deleting, the parent directory of each deleted file is added to a `Set<str
 
 ### Phase 4 — Prune empty managed sub-directories
 
-For every dir in `deletedDirCandidates`, call `cleanupEmptyDirs(cwd, dirPosix)` (re-exported from `commands/update.ts`). This walks the directory bottom-up and removes any sub-directory that became empty after Phase 2 — but it explicitly **refuses to remove managed root dirs** (`.claude`, `.cursor`, `.codex`, etc.) because the normal `update` flow needs them to persist.
+For every dir in `deletedDirCandidates`, call `cleanupEmptyDirs(cwd, dirPosix)` (re-exported from `commands/update.ts`). This walks the directory bottom-up and removes any sub-directory that became empty after Phase 2 — but it explicitly **refuses to remove managed root dirs** (`.kerminal`, `.agents/skills`, etc.) because the normal `update` flow needs them to persist.
 
 ### Phase 5 — Prune empty managed root directories
 
-This is the uninstall-only fixup that `cleanupEmptyDirs` deliberately won't do. After Phase 4, a platform root like `.claude` may be sitting empty (every nested file removed, every nested empty subdir already pruned). During uninstall there is no reason to keep it, so we walk `ALL_MANAGED_DIRS` (excluding `DIR_NAMES.WORKFLOW` because Phase 3 already handled it), sorted **deepest-first** by slash count, and `rmdirSync` each one that is empty.
+This is the uninstall-only fixup that `cleanupEmptyDirs` deliberately won't do. After Phase 4, a platform root like `.kerminal` may be sitting empty (every nested file removed, every nested empty subdir already pruned). During uninstall there is no reason to keep it, so we walk `ALL_MANAGED_DIRS` (excluding `DIR_NAMES.WORKFLOW` because Phase 3 already handled it), sorted **deepest-first** by slash count, and `rmdirSync` each one that is empty.
 
 After removing a deepest dir (e.g. `.agents/skills`), the loop walks **upward** until it hits a non-empty parent or runs out of POSIX path. This handles cases like:
 - `.agents/skills` empty → remove → `.agents` may now be empty → remove → done.
@@ -204,10 +193,10 @@ See [Filesystem Safety § Destructive-op ownership / backup gate](./filesystem-s
 
 ### What `uninstall` will NOT do
 
-- **Touch any file outside `.template-hashes.json`.** User-added scripts inside `.claude/hooks/`, custom commands inside `.cursor/commands/`, project-local agents the user defined themselves — all preserved. Test `#7` in `test/commands/uninstall.integration.test.ts` covers this.
-- **Mutate user-authored sections of structured config.** Scrubbers strip *only* trellis-emitted entries. Other deps in `package.json`, other event hooks in `settings.json`, custom `[features]` table entries in `config.toml` — all preserved. Test `#8` covers this for `.claude/settings.json`.
+- **Touch any file outside `.template-hashes.json`.** User-added skills inside `.kerminal/skills/`, custom skills inside `.agents/skills/`, project-local agents the user defined themselves — all preserved. Test `#7` in `test/commands/uninstall.integration.test.ts` covers this.
+- **Mutate user-authored sections of structured config.** The scrubber strips *only* the Trellis-managed block. User markdown outside the `<!-- TRELLIS:START/END -->` block in `AGENTS.md` is preserved — covered by `test/commands/init-uninstall-overdelete.integration.test.ts`.
 - **Touch git history.** No `git add`, no `git commit`, no `git rm`. The user is expected to commit the post-uninstall state themselves. (Same convention as `update`.)
-- **Touch `~/.codex/config.toml` or any other user-level config.** Codex's hook activation flag (`features.hooks = true`) lives in the user's home config; we never edit that. We do remove the project-local `.codex/config.toml`, which only contains `project_doc_fallback_filenames` + a comment block.
+- **Touch any user-level config outside the project.** Uninstall operates only on manifest paths inside `cwd` plus `.trellis/`; a home-directory config file is never edited. (Historical: the upstream Codex platform declined to touch `~/.codex/config.toml`'s hook-activation flag under this same rule; the platform is gone, the rule stays.)
 - **Reverse migrations.** If a user originally installed v0.4 and migrated to v0.5, `uninstall` removes the v0.5-shape files (whatever the current manifest contains). It does not reconstruct any v0.4 files.
 
 ### Best-effort cleanup
@@ -237,9 +226,7 @@ The corollary: when adding a new platform/template that emits a structured confi
 
 ### 1. "Per-platform uninstall" is not supported
 
-There is no `--platform claude-code` flag. Reason: the manifest does not partition by platform — it is a flat `Record<posixPath, sha256>`. Inferring "this entry belongs to Claude Code" would mean prefix-matching `.claude/`, which is fragile (`.agents/skills/` is shared by Codex and Pi; `.github/copilot/` lives outside the platform-name pattern).
-
-If a user wants to remove just one platform's files, the path is `trellis update` after editing `config.yaml`'s platform list — that flow knows how to deconfigure platforms cleanly. `uninstall` is a single-shot full removal.
+There is no `--platform <name>` flag. Reason: the manifest does not partition by platform — it is a flat `Record<posixPath, sha256>`. Inferring "this entry belongs to platform X" would mean prefix-matching directory names, which is fragile (`.agents/skills/` is a shared root, not a private platform dir; historical platforms also wrote outside their own name pattern). With the Kerminal-only registry this is doubly moot — there is exactly one platform — but the flat-manifest design is why the flag does not exist. `uninstall` is a single-shot full removal.
 
 ### 2. Adding a new structured config file without a scrubber
 
@@ -251,7 +238,7 @@ If a user wants to remove just one platform's files, the path is `trellis update
 
 ### 3. Forgetting that `cleanupEmptyDirs` won't touch root dirs
 
-**Symptom**: After uninstall, `.cursor/` is empty but still present.
+**Symptom**: After uninstall, `.kerminal/` is empty but still present.
 
 **Cause**: `cleanupEmptyDirs` (shared with `update.ts`) refuses to remove anything in `ALL_MANAGED_DIRS` because during `update` those dirs must persist. Phase 5 of `executeManagedRemovalPlan` is the uninstall-specific fixup that goes back and prunes them.
 
@@ -265,19 +252,14 @@ If a user wants to remove just one platform's files, the path is `trellis update
 
 **Note**: There is no "manifest is stale, please run `update` first" warning — uninstall is the user's exit hatch and should not require any prior intervention.
 
-### 5. Codex `[features] hooks = true` survives uninstall
+### 5. Historical per-platform pitfalls (upstream multi-platform era)
 
-**Symptom**: User uninstalls Trellis but `~/.codex/config.toml` still has `[features]\nhooks = true`.
+Two pitfalls previously documented here applied to per-platform scrubbers that were removed in the 0.7.0 Kerminal-only registry collapse (see the 0.7.0 note in [uninstall-scrubbers.md](./uninstall-scrubbers.md)):
 
-**Cause**: That flag is in the **user-level** Codex config, not project-local. Trellis never wrote to it (the README+the project `.codex/config.toml` comment block instruct the user to add it manually). `uninstall` therefore does not remove it.
+- **Codex `[features] hooks = true` survived uninstall** — by design: that flag lived in the *user-level* `~/.codex/config.toml`, which uninstall never touches (only the project-local file was removed).
+- **Hooks-JSON command-string matching was structural, not substring** — the scrubber matched the trailing whitespace-delimited token of each `command`, so a user hook that merely echoed a deleted path was (correctly) not removed.
 
-**Fix**: Document this in the future — add a closing reminder to the green summary if Codex was one of the configured platforms. Currently silent.
-
-### 6. Hooks-JSON command-string matching is structural, not substring
-
-The hooks-JSON scrubber matches on the *trailing whitespace-delimited token* of each `command`, not arbitrary substring. A user-defined hook whose body merely echoes a deleted path (`echo "see .claude/hooks/session-start.py"`) will NOT be removed — its trailing token is `inspiration"`, not the manifest path. This is the correct behavior; see `uninstall-scrubbers.md` for the full matching contract.
-
-If you ever need to extend the scrubber to match different command shapes (e.g. quoted paths, `--script=path` flags), update both `uninstall-scrubbers.ts` and the hooks-JSON tests in `test/utils/uninstall-scrubbers.test.ts` — `uninstall.ts` itself does not need to change.
+The scrubbers and their tests live in git history (≤ 0.6.20). The principles they encoded — user-level config is out of scope; scrub matching is structural, not substring — survive in the boundaries above and apply to any future structured file.
 
 ---
 
@@ -293,20 +275,18 @@ Reference cases (number = test ID in the file):
 |---|---|---|
 | 1 | `.trellis/` missing | Friendly no-op exit, no error. |
 | 2 | `.trellis/` present, manifest missing | Error exit (manual cleanup hint). |
-| 3 | `init claude+cursor → uninstall` | Project is byte-clean afterwards. |
+| 3 | `init kerminal → uninstall` | Project is byte-clean afterwards. |
 | 4 | `--dry-run` | No filesystem mutation. |
 | 5 | Prompt `n` | Aborts with no mutation. |
 | 6 | User-modified manifest file is still removed | Manifest membership trumps modification state. |
 | 7 | User-added file in managed dir survives | Manifest is the scope boundary. |
-| 8 | `.claude/settings.json` with extra user fields | Scrubber preserves user fields, strips trellis hooks. |
-| 8a | Empty managed dirs pruned (Kilo case, no structured config) | Phase 4+5 cleanup. |
-| 8b | Platform root survives when scrubbing leaves residual content | Phase 5 only prunes empty roots. |
+| 8a | Empty managed dirs pruned (kerminal has no structured config) | Phase 4+5 cleanup: the whole `.kerminal/` tree disappears. |
 
-When adding a new structured-config platform:
+When adding a new structured-config platform (or reintroducing one):
 
 1. Add a row to the dispatch table.
 2. Write a unit test in `test/utils/uninstall-scrubbers.test.ts` for the scrubber itself.
-3. Add an integration test in this file mirroring `#8` — init that platform, write some user-owned fields into the structured config, uninstall, assert the user fields survive and the trellis fields are gone.
+3. Add an integration test in this file: init that platform, write some user-owned content into the structured config, uninstall, assert the user content survives and the trellis content is gone.
 
 Do **not** mock `fs` for these tests; they all use real tmpdirs. The pattern is: `beforeEach` makes a tmpdir and `chdir`'s into it, `afterEach` restores `cwd` and `rmSync` the tmpdir. This catches Windows path bugs, permission issues, and unintended side effects that a mocked fs would hide.
 
@@ -331,4 +311,4 @@ Do **not** mock `fs` for these tests; they all use real tmpdirs. The pattern is:
 | `DIR_NAMES.WORKFLOW` | `constants/paths.ts:DIR_NAMES` |
 | `collectUncommittedTrellisData` | `commands/uninstall.ts:collectUncommittedTrellisData` (exported) |
 | `TRELLIS_ALLOW_DIRTY_UNINSTALL` (env bypass) | checked via `dirtyUninstallBypassEnabled` in `commands/uninstall.ts` |
-| Scrubbers (`scrubHooksJson`, `scrubOpencodePackageJson`, `scrubPiSettings`, `scrubCodexConfigToml`, `scrubManagedMarkdownBlock`) | `utils/uninstall-scrubbers.ts` — see `uninstall-scrubbers.md` |
+| Scrubber (`scrubManagedMarkdownBlock`) | `utils/uninstall-scrubbers.ts` — see `uninstall-scrubbers.md` (per-platform scrubbers removed in 0.7.0; git history ≤ 0.6.20) |

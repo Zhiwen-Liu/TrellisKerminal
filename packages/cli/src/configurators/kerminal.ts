@@ -9,7 +9,7 @@
  * and `<projectRoot>/.agents/skills` (agentskills.io shared standard).
  * Three output paths:
  * - `.agents/skills/` — workflow + bundled skills, written via the NEUTRAL
- *   resolver so the files stay byte-identical to Codex/Gemini/Pi/dsh/Kimi
+ *   resolver so the files stay identical across every consumer of the shared root
  *   writes into the same shared root.
  * - `.kerminal/skills/` — Kerminal-private user-invocable entry skills
  *   (`trellis-start` / `trellis-continue` / `trellis-finish-work`) plus the
@@ -79,7 +79,7 @@ export function collectKerminalTemplates(): Map<string, string> {
   const files = new Map<string, string>();
 
   // 1. Workflow + bundled skills → shared `.agents/skills/` (neutral
-  //    rendering, byte-identical to Codex/Gemini/Pi/dsh/Kimi writes).
+  //    rendering, identical across every consumer of the shared root
   for (const [filePath, content] of collectSkillTemplates(
     ".agents/skills",
     resolveSkillsNeutral(ctx),

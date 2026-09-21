@@ -53,5 +53,5 @@ If the task and JSONL are correct, determine whether the platform uses hook push
 
 - Settings handle registration, hook scripts handle behavior; inspect both together.
 - Different platforms support different hook events. Do not directly copy another platform's settings.
-- Hooks should read project-local `.trellis/`; they should not depend on Trellis upstream source paths.
+- Hooks should read project-local `.trellis/`; they should not depend on trellis-kerminal CLI source paths.
 - Hook failures should produce visible errors so AI does not silently lose context.

@@ -39,13 +39,13 @@ Task is not required when the answer is a one-reply explanation, no files are ch
 
 If the formal Phase 1 flow also needs to change, synchronize the Phase 1 section.
 
-## Example: One Platform Does Not Use Sub-Agents
+## Example: Main Session Does Not Use Sub-Agents
 
-If the user wants only one platform to avoid sub-agents, first confirm whether that platform has a separate group in the workflow. Then change Phase 2 routing for that platform group instead of deleting all `trellis-implement` / `trellis-check` instructions across platforms.
+If the user wants the main session to handle implementation and checking itself, change the Phase 2 routing in `.trellis/workflow.md` instead of deleting the `trellis-implement` / `trellis-check` skills under `.kerminal/skills/` — keeping the skills intact lets the routing be restored later.
 
 ## `/trellis:continue` Route Table
 
-`/trellis:continue` resumes a task by deciding which phase step to load next. The decision combines `task.json.status` with the presence of artifacts inside the task directory. The mapping is fixed in the command itself; forks that add custom statuses must extend both the workflow.md tag block and this table.
+`/trellis:continue` resumes a task by deciding which phase step to load next. The decision combines `task.json.status` with the presence of artifacts inside the task directory. The mapping is fixed in the command itself; customizations that add custom statuses must extend both the workflow.md tag block and this table.
 
 | `status` | Artifact state | Resume at |
 | --- | --- | --- |

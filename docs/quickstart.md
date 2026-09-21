@@ -79,5 +79,13 @@ trellis update
 - `trellis upgrade` is a convenience wrapper that runs the npm global install
   for you.
 
+## Other commands
+
+- `trellis mem` — search and recall AI conversation history from local session
+  stores (Kerminal, Claude Code, Codex, and more). `trellis mem help` lists
+  subcommands: `list`, `search`, `context`, `extract`, `projects`.
+- `trellis workflow` — reset the project's `.trellis/workflow.md` to the
+  bundled native template (`--list` shows what is available).
+
 See the [Kerminal reference](./kerminal.md) for how the platform integration
 works.
