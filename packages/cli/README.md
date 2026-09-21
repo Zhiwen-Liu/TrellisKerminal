@@ -12,9 +12,9 @@
 </p>
 
 <p align="center">
-<a href="./README_CN.md">简体中文</a> •
-<a href="./docs/quickstart.md">Quick Start</a> •
-<a href="./docs/kerminal.md">Kerminal Reference</a>
+<a href="https://github.com/Zhiwen-Liu/TrellisKerminal/blob/main/README_CN.md">简体中文</a> •
+<a href="https://github.com/Zhiwen-Liu/TrellisKerminal/blob/main/docs/quickstart.md">Quick Start</a> •
+<a href="https://github.com/Zhiwen-Liu/TrellisKerminal/blob/main/docs/kerminal.md">Kerminal Reference</a>
 </p>
 
 <p align="center">
@@ -160,14 +160,10 @@ pnpm install && pnpm build
 cd packages/cli && pnpm link --global   # provides trellis / tl
 ```
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide.
-
-## Community
-
-- [GitHub Issues](https://github.com/Zhiwen-Liu/TrellisKerminal/issues) · [Discussions](https://github.com/Zhiwen-Liu/TrellisKerminal/discussions)
+See [CONTRIBUTING.md](https://github.com/Zhiwen-Liu/TrellisKerminal/blob/main/CONTRIBUTING.md) for the full guide.
 
 <p align="center">
 <a href="https://github.com/Zhiwen-Liu/TrellisKerminal">TrellisKerminal</a> •
-<a href="./LICENSE">AGPL-3.0 License</a> •
+<a href="https://github.com/Zhiwen-Liu/TrellisKerminal/blob/main/LICENSE">AGPL-3.0 License</a> •
 Built by <a href="https://github.com/Zhiwen-Liu">Zhiwen-Liu</a>
 </p>
