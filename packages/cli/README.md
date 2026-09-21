@@ -8,7 +8,7 @@
 
 <p align="center">
 <strong>An out-of-the-box engineering framework for AI coding.</strong><br/>
-<sub>AI writes code fast, but every session it starts from scratch — no memory of your project, your conventions, or your team's requirements. Trellis persists specs, tasks, and memory into your repo, so any coding agent works to your engineering standards.</sub>
+<sub>AI writes code fast, but every session it starts from scratch — no memory of your project, your conventions, or your team's requirements. Trellis persists specs, tasks, and memory into your repo, so every Kerminal session works to your engineering standards.</sub>
 </p>
 
 > [!NOTE]
@@ -33,7 +33,7 @@
 
 | Capability | What it changes |
 | --- | --- |
-| **Auto-injected specs** | Write conventions once in `.trellis/spec/`, then let Trellis inject the relevant context into each session instead of repeating yourself. |
+| **Spec-driven context** | Write conventions once in `.trellis/spec/`; task manifests (`implement.jsonl` / `check.jsonl`) pull the relevant specs into each sub-agent's context instead of repeating yourself. |
 | **Task-centered workflow** | Keep PRDs, implementation context, review context, and task status in `.trellis/tasks/` so AI work stays structured. |
 | **Project memory** | Journals in `.trellis/workspace/` preserve what happened last time, so each new session starts with real context. |
 | **Team-shared standards** | Specs live in the repo, so one person's hard-won workflow or rule can benefit the whole team. |
@@ -82,9 +82,8 @@ The workflow is simple:
 Trellis runs a 3-phase loop (Plan → Execute → Finish) with skills and sub-agents dispatched on demand:
 
 1. **Plan** — `trellis-brainstorm` walks through requirements one question at a time and writes `prd.md`. Research-heavy items go to a `trellis-research` sub-agent. The result is curated specs + research files referenced from `implement.jsonl` / `check.jsonl`.
-2. **Implement** — a `trellis-implement` sub-agent writes code from the PRD with the curated context auto-injected, no git commit.
-3. **Verify** — a `trellis-check` sub-agent reviews the diff against specs and runs lint, type-check, and tests, self-fixing where it can.
-4. **Finish** — a final check runs, then `trellis-update-spec` promotes new learnings back into `.trellis/spec/` so the next session starts smarter.
+2. **Execute** — a `trellis-implement` sub-agent writes code from the PRD, loading the curated context from `implement.jsonl` first (no git commit); a `trellis-check` sub-agent then reviews the diff against specs and runs lint, type-check, and tests, self-fixing where it can.
+3. **Finish** — a final full-scope check runs, then `trellis-update-spec` promotes new learnings back into `.trellis/spec/` so the next session starts smarter.
 
 ## Resources
 
@@ -98,7 +97,7 @@ Trellis runs a 3-phase loop (Plan → Execute → Finish) with skills and sub-ag
 <details>
 <summary><strong>How is Trellis different from <code>CLAUDE.md</code>, <code>AGENTS.md</code>, or <code>.cursorrules</code>?</strong></summary>
 
-Those files are useful entry points, but they tend to become monolithic. Trellis adds scoped specs, task PRDs, workflow gates, workspace memory, and platform-aware generated files around them.
+Those files are useful entry points, but they tend to become monolithic. Trellis adds scoped specs, task PRDs, workflow gates, workspace memory, and Kerminal-tuned generated files around them.
 
 </details>
 

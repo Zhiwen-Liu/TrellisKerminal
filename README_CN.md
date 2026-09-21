@@ -8,7 +8,7 @@
 
 <p align="center">
 <strong>开箱即用的 AI 编码工程化框架</strong><br/>
-<sub>AI 写代码很快，但它每次会话都从零开始理解项目，记不住你的规范，也记不住团队级别的需求。Trellis 会把规范、任务、记忆沉淀进仓库，让任意 Coding Agent 都按你的工程标准来实践。</sub>
+<sub>AI 写代码很快，但它每次会话都从零开始理解项目，记不住你的规范，也记不住团队级别的需求。Trellis 会把规范、任务、记忆沉淀进仓库，让每一次 Kerminal 会话都按你的工程标准来实践。</sub>
 </p>
 
 > [!NOTE]
@@ -33,7 +33,7 @@
 
 | 能力 | 带来的改变 |
 | --- | --- |
-| **自动注入规范** | 将规范沉淀到 `.trellis/spec/` 之后，Trellis 会在每次会话中按当前任务自动按需注入相关上下文，无需反复说明。 |
+| **规范驱动上下文** | 将规范沉淀到 `.trellis/spec/`；任务清单（`implement.jsonl` / `check.jsonl`）会把相关规范拉取进每个子代理的上下文，无需反复说明。 |
 | **任务驱动工作流** | PRD、实现上下文、审查上下文与任务状态统一存放于 `.trellis/tasks/`，AI 开发过程保持结构化、可追溯。 |
 | **项目记忆** | `.trellis/workspace/` 中的工作日志（journal）会保留上一次会话的脉络，因此每次新会话都能基于真实上下文开始。 |
 | **团队共享标准** | Spec 随仓库一同版本化，个人总结出的规则与流程可以直接成为整个团队的基础设施。 |
@@ -82,9 +82,8 @@ cd packages/cli && pnpm link --global   # 提供 `trellis`（别名 `tl`）
 Trellis 内部运行一个 3 阶段循环（Plan → Execute → Finish），skill 与子代理按需派发：
 
 1. **Plan（规划）** —— `trellis-brainstorm` 逐题梳理需求并写入 `prd.md`；涉及资料调研的部分派发给 `trellis-research` 子代理处理。阶段产出为一组精选的 Spec 与研究文件，由 `implement.jsonl` / `check.jsonl` 编排。
-2. **Implement（实现）** —— `trellis-implement` 子代理依据 PRD 编写代码，所需上下文已按 `implement.jsonl` 自动注入，不会执行 git commit。
-3. **Verify（验证）** —— `trellis-check` 子代理基于 diff 对照 Spec 逐项核查，并运行 lint、type-check 与测试，在能力范围内自动修复。
-4. **Finish（收尾）** —— 执行最终检查后，`trellis-update-spec` 将本轮新增的认知沉淀回 `.trellis/spec/`，为下一次会话积累上下文。
+2. **Execute（执行）** —— `trellis-implement` 子代理先加载 `implement.jsonl` 编排的上下文，再依据 PRD 编写代码（不执行 git commit）；随后 `trellis-check` 子代理基于 diff 对照 Spec 逐项核查，并运行 lint、type-check 与测试，在能力范围内自动修复。
+3. **Finish（收尾）** —— 执行最终全量检查后，`trellis-update-spec` 将本轮新增的认知沉淀回 `.trellis/spec/`，为下一次会话积累上下文。
 
 ## 资源
 

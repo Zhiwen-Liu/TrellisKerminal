@@ -1,0 +1,9 @@
+{
+  "version": "0.8.2",
+  "description": "Documentation and template accuracy pass: full independence from upstream Trellis.",
+  "breaking": false,
+  "recommendMigrate": false,
+  "changelog": "**Docs and templates.** README/CONTRIBUTING/docs rewritten for the standalone Kerminal-only project (upstream links, badges, Star History, and fork framing removed; demo GIFs retired \u2014 the npm package shrinks from 110.8 MB to ~560 KB). Bundled-skill references and the trellis-meta skill rewritten Kerminal-only. init PRDs (bootstrap/joiner) rewritten for the pull-based model. workflow.md drops slash-command references and repo-internal paths. config.yaml documents update.skip. docs/quickstart and the Kerminal reference now cover trellis mem / trellis workflow / environment variables. Internal specs repositioned as historical references. Code cleanup: zod dependency removed, dead exports pruned, npm files trimmed. No migrations required.",
+  "migrations": [],
+  "notes": "Run `trellis update` to refresh templates. Install: `npm install -g trellis-kerminal@latest`"
+}
